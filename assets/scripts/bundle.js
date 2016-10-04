@@ -44847,6 +44847,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * @function round
+ * @return {number}
  */
 var round = exports.round = function round(n) {
     var factor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
@@ -44856,6 +44857,7 @@ var round = exports.round = function round(n) {
 
 /**
  * @function abs
+ * @return {number}
  */
 var abs = exports.abs = function abs(n) {
     return Math.abs(n);
@@ -44917,16 +44919,14 @@ var s = exports.s = function s(i) {
 // TODO: rename to isWithin
 /**
  * @function within
+ * @param n
+ * @param c
+ * @param r
  * @return {number}
  */
 var within = exports.within = function within(n, c, r) {
     return n > c + r || n < c - r;
 };
-
-// TODO: update references to use exports instead of functions attached to window
-// window.randint = randint;
-// window.s = s;
-// window.within = within;
 
 // TODO: add a divisor paramater that dfaults to `2`
 /**
@@ -44987,41 +44987,22 @@ var crange = exports.crange = function crange(il, i, ih, ol, oh) {
 };
 
 /**
+ * Clamp a value to be within a certain range
  *
  * @function clamp
- * @param low {number}
- * @param i {number}
- * @param high {number} (optional)
+ * @param min {number}
+ * @param valueToClamp {number}
+ * @param max {number} (optional)
  * @return {number}
  */
-var clamp = exports.clamp = function clamp(low, i) {
-    var high = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+var clamp = exports.clamp = function clamp(min, valueToClamp) {
+    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : Infinity;
 
-    if (!high) {
-        if (low > i) {
-            return low;
-        }
-
-        return i;
+    if (!(0, _isNumber3.default)(valueToClamp)) {
+        throw new TypeError('Invalid parameter. Expected `valueToClamp` to be a number');
     }
 
-    var temp = void 0;
-
-    if (low > high) {
-        temp = high;
-        high = low;
-        low = temp;
-    }
-
-    if (low > i) {
-        return low;
-    }
-
-    if (high < i) {
-        return high;
-    }
-
-    return i;
+    return Math.max(min, Math.min(valueToClamp, max));
 };
 
 },{"lodash/isNumber":448}],530:[function(require,module,exports){

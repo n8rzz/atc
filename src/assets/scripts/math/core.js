@@ -2,6 +2,7 @@ import _isNumber from 'lodash/isNumber';
 
 /**
  * @function round
+ * @return {number}
  */
 export const round = (n, factor = 1) => {
     return Math.round(n / factor) * factor;
@@ -9,6 +10,7 @@ export const round = (n, factor = 1) => {
 
 /**
  * @function abs
+ * @return {number}
  */
 export const abs = (n) => {
     return Math.abs(n);
@@ -68,17 +70,14 @@ export const s = (i) => {
 // TODO: rename to isWithin
 /**
  * @function within
+ * @param n
+ * @param c
+ * @param r
  * @return {number}
  */
 export const within = (n, c, r) => {
     return n > (c + r) || n < (c - r);
 };
-
-
-// TODO: update references to use exports instead of functions attached to window
-// window.randint = randint;
-// window.s = s;
-// window.within = within;
 
 // TODO: add a divisor paramater that dfaults to `2`
 /**
@@ -141,37 +140,18 @@ export const crange = (il, i, ih, ol, oh) => {
 };
 
 /**
+ * Clamp a value to be within a certain range
  *
  * @function clamp
- * @param low {number}
- * @param i {number}
- * @param high {number} (optional)
+ * @param min {number}
+ * @param valueToClamp {number}
+ * @param max {number} (optional)
  * @return {number}
  */
-export const clamp = (low, i, high = null) => {
-    if (!high) {
-        if (low > i) {
-            return low;
-        }
-
-        return i;
+export const clamp = (min, valueToClamp, max = Infinity) => {
+    if (!_isNumber(valueToClamp)) {
+        throw new TypeError('Invalid parameter. Expected `valueToClamp` to be a number');
     }
 
-    let temp;
-
-    if (low > high) {
-        temp = high;
-        high = low;
-        low = temp;
-    }
-
-    if (low > i) {
-        return low;
-    }
-
-    if (high < i) {
-        return high;
-    }
-
-    return i;
+    return Math.max(min, Math.min(valueToClamp, max));
 };
