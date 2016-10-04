@@ -30455,10 +30455,6 @@ var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
-
 var _get2 = require('lodash/get');
 
 var _get3 = _interopRequireDefault(_get2);
@@ -30466,6 +30462,8 @@ var _get3 = _interopRequireDefault(_get2);
 var _map2 = require('lodash/map');
 
 var _map3 = _interopRequireDefault(_map2);
+
+var _core = require('./math/core');
 
 var _selectors = require('./constants/selectors');
 
@@ -31169,7 +31167,7 @@ var InputController = function () {
     }, {
         key: 'input_history_clamp',
         value: function input_history_clamp() {
-            prop.input.history_item = (0, _clamp3.default)(0, prop.input.history_item, prop.input.history.length - 1);
+            prop.input.history_item = (0, _core.clamp)(0, prop.input.history_item, prop.input.history.length - 1);
         }
 
         /**
@@ -31346,7 +31344,7 @@ var InputController = function () {
 
 exports.default = InputController;
 
-},{"./constants/selectors":520,"jquery":296,"lodash/clamp":429,"lodash/get":435,"lodash/map":456}],491:[function(require,module,exports){
+},{"./constants/selectors":520,"./math/core":529,"jquery":296,"lodash/get":435,"lodash/map":456}],491:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33159,10 +33157,6 @@ var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
-
 var _last2 = require('lodash/last');
 
 var _last3 = _interopRequireDefault(_last2);
@@ -33178,6 +33172,8 @@ var _Waypoint2 = _interopRequireDefault(_Waypoint);
 var _Leg = require('./Leg');
 
 var _Leg2 = _interopRequireDefault(_Leg);
+
+var _core = require('../math/core');
 
 var _logLevel = require('../constants/logLevel');
 
@@ -33255,7 +33251,7 @@ var AircraftFlightManagementSystem = function () {
         };
 
         // set initial
-        this.fp.altitude = (0, _clamp3.default)(1000, options.model.ceiling, 60000);
+        this.fp.altitude = (0, _core.clamp)(1000, options.model.ceiling, 60000);
 
         if (options.aircraft.category === 'arrival') {
             this.prependLeg({ route: 'KDBG' });
@@ -34311,7 +34307,7 @@ var AircraftFlightManagementSystem = function () {
 
 exports.default = AircraftFlightManagementSystem;
 
-},{"../constants/logLevel":519,"./Leg":499,"./Waypoint":500,"jquery":296,"lodash/clamp":429,"lodash/last":455,"lodash/map":456}],496:[function(require,module,exports){
+},{"../constants/logLevel":519,"../math/core":529,"./Leg":499,"./Waypoint":500,"jquery":296,"lodash/last":455,"lodash/map":456}],496:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34319,16 +34315,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.WAYPOINT_NAV_MODE = exports.FLIGHT_CATEGORY = exports.FLIGHT_MODES = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* eslint-disable camelcase, no-underscore-dangle, no-mixed-operators, func-names, object-shorthand, no-undef, guard-for-in, no-restricted-syntax, max-len, prefer-arrow-callback, */
-
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
-
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
 
 var _forEach2 = require('lodash/forEach');
 
@@ -35330,7 +35321,7 @@ var Aircraft = function () {
 
             this.fms.setAll({
                 // TODO: enumerate the magic numbers
-                altitude: (0, _clamp3.default)((0, _core.round)(window.airportController.airport_get().elevation / 100) * 100 + 1000, altitude, ceiling),
+                altitude: (0, _core.clamp)((0, _core.round)(window.airportController.airport_get().elevation / 100) * 100 + 1000, altitude, ceiling),
                 expedite: expedite
             });
 
@@ -35435,7 +35426,7 @@ var Aircraft = function () {
             }
 
             this.fms.setAll({
-                speed: (0, _clamp3.default)(this.model.speed.min, speed, this.model.speed.max)
+                speed: (0, _core.clamp)(this.model.speed.min, speed, this.model.speed.max)
             });
 
             var readback = {
@@ -36482,7 +36473,7 @@ var Aircraft = function () {
                     angle -= (0, _circle.tau)();
                 }
 
-                glideslope_altitude = (0, _clamp3.default)(0, runway.getGlideslopeAltitude(offset[1]), this.altitude);
+                glideslope_altitude = (0, _core.clamp)(0, runway.getGlideslopeAltitude(offset[1]), this.altitude);
                 glideslope_window = (0, _core.abs)(runway.getGlideslopeAltitude(offset[1], (0, _unitConverters.degreesToRadians)(1)));
 
                 if (this.mode === FLIGHT_MODES.LANDING) {
@@ -36522,7 +36513,7 @@ var Aircraft = function () {
                         // Steer to within 3m of the centerline while at least 200m out
                         if (offset[1] > 0.2 && (0, _core.abs)(offset[0]) > 0.003) {
                             // TODO: enumerate the magic numbers
-                            this.target.heading = (0, _clamp3.default)((0, _unitConverters.degreesToRadians)(-30), -12 * offset_angle, (0, _unitConverters.degreesToRadians)(30)) + angle;
+                            this.target.heading = (0, _core.clamp)((0, _unitConverters.degreesToRadians)(-30), -12 * offset_angle, (0, _unitConverters.degreesToRadians)(30)) + angle;
                         }
 
                         // Follow the glideslope
@@ -36622,7 +36613,7 @@ var Aircraft = function () {
                 this.target.expedite = this.fms.currentWaypoint().expedite;
                 this.target.altitude = Math.max(1000, this.target.altitude);
                 this.target.speed = this.fms.currentWaypoint().speed;
-                this.target.speed = (0, _clamp3.default)(this.model.speed.min, this.target.speed, this.model.speed.max);
+                this.target.speed = (0, _core.clamp)(this.model.speed.min, this.target.speed, this.model.speed.max);
             }
 
             // If stalling, make like a meteorite and fall to the earth!
@@ -36725,7 +36716,7 @@ var Aircraft = function () {
                 // Perform standard turns 3 deg/s or 25 deg bank, whichever
                 // requires less bank angle.
                 // Formula based on http://aviation.stackexchange.com/a/8013
-                var turn_rate = (0, _clamp3.default)(0, 1 / (this.speed / 8.883031), 0.0523598776);
+                var turn_rate = (0, _core.clamp)(0, 1 / (this.speed / 8.883031), 0.0523598776);
                 var turn_amount = turn_rate * window.gameController.game_delta();
                 var offset = (0, _circle.angle_offset)(this.target.heading, this.heading);
 
@@ -37169,7 +37160,7 @@ var Aircraft = function () {
 
 exports.default = Aircraft;
 
-},{"../constants/selectors":520,"../math/circle":528,"../math/core":529,"../math/distance":530,"../math/flightMath":531,"../math/vector":532,"../speech":534,"../utilities/radioUtilities":538,"../utilities/unitConverters":540,"./AircraftFlightManagementSystem":495,"./AircraftStripView":498,"./Waypoint":500,"jquery":296,"lodash/clamp":429,"lodash/forEach":434,"lodash/get":435,"lodash/has":436,"lodash/isNaN":447,"lodash/isString":451,"lodash/map":456}],497:[function(require,module,exports){
+},{"../constants/selectors":520,"../math/circle":528,"../math/core":529,"../math/distance":530,"../math/flightMath":531,"../math/vector":532,"../speech":534,"../utilities/radioUtilities":538,"../utilities/unitConverters":540,"./AircraftFlightManagementSystem":495,"./AircraftStripView":498,"./Waypoint":500,"jquery":296,"lodash/forEach":434,"lodash/get":435,"lodash/has":436,"lodash/isNaN":447,"lodash/isString":451,"lodash/map":456}],497:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41862,17 +41853,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* eslint-disable camelcase, no-underscore-dangle, no-mixed-operators, func-names, object-shorthand,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-param-reassign, no-undef, class-methods-use-this */
-
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
-
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
 
 var _cloneDeep2 = require('lodash/cloneDeep');
 
@@ -42825,7 +42810,7 @@ var ConvasController = function () {
                 var w = this.canvas.size.width / 2;
                 var h = this.canvas.size.height / 2;
 
-                cc.translate((0, _clamp3.default)(-w, window.uiController.km_to_px(aircraft.position[0]) + this.canvas.panX, w), (0, _clamp3.default)(-h, -window.uiController.km_to_px(aircraft.position[1]) + this.canvas.panY, h));
+                cc.translate((0, _core.clamp)(-w, window.uiController.km_to_px(aircraft.position[0]) + this.canvas.panX, w), (0, _core.clamp)(-h, -window.uiController.km_to_px(aircraft.position[1]) + this.canvas.panY, h));
 
                 cc.beginPath();
                 cc.arc(0, 0, (0, _core.round)(size * 1.5), 0, (0, _circle.tau)());
@@ -43035,7 +43020,7 @@ var ConvasController = function () {
                 var cs = aircraft.getCallsign();
                 var paddingLR = 5;
                 // width of datablock (scales to fit callsign)
-                var width = (0, _clamp3.default)(1, 5.8 * cs.length) + paddingLR * 2;
+                var width = (0, _core.clamp)(1, 5.8 * cs.length) + paddingLR * 2;
                 var width2 = width / 2;
                 // height of datablock
                 var height = 31;
@@ -43174,9 +43159,9 @@ var ConvasController = function () {
 
                 // TODO: remove the if/else in favor of an initial assignment, and update with if condition
                 if (aircraft.inside_ctr) {
-                    cc.fillStyle = COLORS.WHITE;
+                    cc.fillStyle = COLORS.WHITE_08;
                 } else {
-                    cc.fillStyle = COLORS.LIGHT_SILVER;
+                    cc.fillStyle = COLORS.WHITE_02;
                 }
 
                 if (aircraft.trend === 0) {
@@ -43473,7 +43458,7 @@ var ConvasController = function () {
 
             cc.strokeStyle = COLORS.WHITE_04;
             cc.fillStyle = COLORS.WHITE_02;
-            cc.lineWidth = (0, _clamp3.default)(0.5, prop.ui.scale / 10, 2);
+            cc.lineWidth = (0, _core.clamp)(0.5, prop.ui.scale / 10, 2);
             cc.lineJoin = 'round';
 
             var airport = window.airportController.airport_get();
@@ -43755,7 +43740,7 @@ var ConvasController = function () {
 
 exports.default = ConvasController;
 
-},{"../aircraft/AircraftInstanceModel":496,"../constants/logLevel":519,"../constants/selectors":520,"../math/circle":528,"../math/core":529,"../math/distance":530,"../math/vector":532,"../utilities/timeHelpers":539,"../utilities/unitConverters":540,"jquery":296,"lodash/clamp":429,"lodash/cloneDeep":431,"lodash/forEach":434,"lodash/has":436}],519:[function(require,module,exports){
+},{"../aircraft/AircraftInstanceModel":496,"../constants/logLevel":519,"../constants/selectors":520,"../math/circle":528,"../math/core":529,"../math/distance":530,"../math/vector":532,"../utilities/timeHelpers":539,"../utilities/unitConverters":540,"jquery":296,"lodash/cloneDeep":431,"lodash/forEach":434,"lodash/has":436}],519:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44850,13 +44835,9 @@ var fix_angle = exports.fix_angle = function fix_angle(radians) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.crange = exports.mod = exports.calculateMiddle = exports.within = exports.s = exports.randint = exports.fl = exports.tan = exports.cos = exports.sin = exports.abs = exports.round = undefined;
+exports.clamp = exports.crange = exports.mod = exports.calculateMiddle = exports.within = exports.s = exports.randint = exports.fl = exports.tan = exports.cos = exports.sin = exports.abs = exports.round = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
 
 var _isNumber2 = require('lodash/isNumber');
 
@@ -45002,10 +44983,48 @@ var trange = function trange(il, i, ih, ol, oh) {
  * @return {number}
  */
 var crange = exports.crange = function crange(il, i, ih, ol, oh) {
-    return (0, _clamp3.default)(ol, trange(il, i, ih, ol, oh), oh);
+    return clamp(ol, trange(il, i, ih, ol, oh), oh);
 };
 
-},{"lodash/clamp":429,"lodash/isNumber":448}],530:[function(require,module,exports){
+/**
+ *
+ * @function clamp
+ * @param low {number}
+ * @param i {number}
+ * @param high {number} (optional)
+ * @return {number}
+ */
+var clamp = exports.clamp = function clamp(low, i) {
+    var high = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+    if (!high) {
+        if (low > i) {
+            return low;
+        }
+
+        return i;
+    }
+
+    var temp = void 0;
+
+    if (low > high) {
+        temp = high;
+        high = low;
+        low = temp;
+    }
+
+    if (low > i) {
+        return low;
+    }
+
+    if (high < i) {
+        return high;
+    }
+
+    return i;
+};
+
+},{"lodash/isNumber":448}],530:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48966,16 +48985,12 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* eslint-disable camelcase, no-underscore-dangle, no-mixed-operators, func-names, object-shorthand, no-undef, max-len */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* eslint-disable max-len */
 
 
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
-
-var _clamp2 = require('lodash/clamp');
-
-var _clamp3 = _interopRequireDefault(_clamp2);
 
 var _has2 = require('lodash/has');
 
@@ -49614,7 +49629,7 @@ var TutorialView = function () {
                 return;
             }
 
-            prop.tutorial.step = (0, _clamp3.default)(0, prop.tutorial.step + 1, prop.tutorial.steps.length - 1);
+            prop.tutorial.step = (0, _core.clamp)(0, prop.tutorial.step + 1, prop.tutorial.steps.length - 1);
 
             this.tutorial_update_content();
         }
@@ -49626,7 +49641,7 @@ var TutorialView = function () {
     }, {
         key: 'tutorial_prev',
         value: function tutorial_prev() {
-            prop.tutorial.step = (0, _clamp3.default)(0, prop.tutorial.step - 1, prop.tutorial.steps.length - 1);
+            prop.tutorial.step = (0, _core.clamp)(0, prop.tutorial.step - 1, prop.tutorial.steps.length - 1);
 
             this.tutorial_update_content();
         }
@@ -49648,7 +49663,7 @@ var TutorialView = function () {
 
 exports.default = TutorialView;
 
-},{"../constants/selectors":520,"../constants/storageKeys":521,"../math/core":529,"../utilities/timeHelpers":539,"../utilities/unitConverters":540,"./TutorialStep":535,"jquery":296,"lodash/clamp":429,"lodash/has":436}],537:[function(require,module,exports){
+},{"../constants/selectors":520,"../constants/storageKeys":521,"../math/core":529,"../utilities/timeHelpers":539,"../utilities/unitConverters":540,"./TutorialStep":535,"jquery":296,"lodash/has":436}],537:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };

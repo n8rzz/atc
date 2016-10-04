@@ -1,4 +1,3 @@
-import _clamp from 'lodash/clamp';
 import _isNumber from 'lodash/isNumber';
 
 /**
@@ -134,9 +133,45 @@ const trange = (il, i, ih, ol, oh) => {
  * @return {number}
  */
 export const crange = (il, i, ih, ol, oh) => {
-    return _clamp(
+    return clamp(
         ol,
         trange(il, i, ih, ol, oh),
         oh
     );
+};
+
+/**
+ *
+ * @function clamp
+ * @param low {number}
+ * @param i {number}
+ * @param high {number} (optional)
+ * @return {number}
+ */
+export const clamp = (low, i, high = null) => {
+    if (!high) {
+        if (low > i) {
+            return low;
+        }
+
+        return i;
+    }
+
+    let temp;
+
+    if (low > high) {
+        temp = high;
+        high = low;
+        low = temp;
+    }
+
+    if (low > i) {
+        return low;
+    }
+
+    if (high < i) {
+        return high;
+    }
+
+    return i;
 };
