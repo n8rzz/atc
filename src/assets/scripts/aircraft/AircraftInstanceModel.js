@@ -2021,7 +2021,7 @@ export default class Aircraft {
             }
 
             // lock ILS if at the right angle and altitude
-            if ((abs(this.altitude - glideslope_altitude) < glideslope_window)
+            if (this.altitude < (glideslope_altitude + glideslope_window)
                 && (abs(offset_angle) < degreesToRadians(10))
                 && (offset[1] < ils)
             ) {
