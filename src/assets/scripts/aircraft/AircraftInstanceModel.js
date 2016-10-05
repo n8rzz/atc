@@ -2012,7 +2012,7 @@ export default class Aircraft {
             glideslope_window   = abs(runway.getGlideslopeAltitude(offset[1], degreesToRadians(1)));
 
             if (this.mode === FLIGHT_MODES.LANDING) {
-                this.target.altitude = glideslope_altitude;
+                this.target.altitude = Math.min(this.fms.currentWaypoint().altitude, glideslope_altitude);
             }
 
             let ils = runway.ils.loc_maxDist;
@@ -2057,7 +2057,7 @@ export default class Aircraft {
                     }
 
                     // Follow the glideslope
-                    this.target.altitude = glideslope_altitude;
+                    this.target.altitude = Math.min(this.fms.currentWaypoint().altitude, glideslope_altitude);
                 }
 
                 // Speed control on final approach
