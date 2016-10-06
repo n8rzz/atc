@@ -123,6 +123,47 @@ const trange = (il, i, ih, ol, oh) => {
 };
 
 /**
+ * Clamp a value to be within a certain range
+ *
+ * @function clamp
+ * @param min {number}
+ * @param valueToClamp {number}
+ * @param max {number} (optional)
+ * @return {number}
+ */
+export const clamp = (min, valueToClamp, max = Infinity) => {
+    let temp;
+
+    if (!_isNumber(valueToClamp)) {
+        throw new TypeError('Invalid parameter. Expected `valueToClamp` to be a number');
+    }
+
+    if (max === Infinity) {
+        if (min > valueToClamp) {
+            return min;
+        }
+
+        return valueToClamp;
+    }
+
+    if (min > max) {
+        temp = max;
+        max = min;
+        min = temp;
+    }
+
+    if (min > valueToClamp) {
+        return min;
+    }
+
+    if (max < valueToClamp) {
+        return max;
+    }
+
+    return valueToClamp;
+};
+
+/**
  * @function crange
  * @param il {number}
  * @param i {number}
@@ -137,21 +178,4 @@ export const crange = (il, i, ih, ol, oh) => {
         trange(il, i, ih, ol, oh),
         oh
     );
-};
-
-/**
- * Clamp a value to be within a certain range
- *
- * @function clamp
- * @param min {number}
- * @param valueToClamp {number}
- * @param max {number} (optional)
- * @return {number}
- */
-export const clamp = (min, valueToClamp, max = Infinity) => {
-    if (!_isNumber(valueToClamp)) {
-        throw new TypeError('Invalid parameter. Expected `valueToClamp` to be a number');
-    }
-
-    return Math.max(min, Math.min(valueToClamp, max));
 };
