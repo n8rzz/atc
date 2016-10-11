@@ -11,7 +11,7 @@ import AircraftFlightManagementSystem from './AircraftFlightManagementSystem';
 import AircraftStripView from './AircraftStripView';
 import Waypoint from './Waypoint';
 import { speech_say } from '../speech';
-import { tau, fix_angle, angle_offset } from '../math/circle';
+import { tau, radians_normalize, angle_offset } from '../math/circle';
 import { round, abs, sin, cos, crange } from '../math/core';
 import { distance2d } from '../math/distance';
 import { getOffset } from '../math/flightMath';
@@ -1170,7 +1170,7 @@ export default class Aircraft {
         }
 
         // TODO: abstract to method `.getInboundCardinalDirection()`
-        const inboundDir = radio_cardinalDir_names[getCardinalDirection(fix_angle(inboundHdg + Math.PI)).toLowerCase()];
+        const inboundDir = radio_cardinalDir_names[getCardinalDirection(radians_normalize(inboundHdg + Math.PI)).toLowerCase()];
 
         if (holdFix) {
             return ['ok', `proceed direct ${holdFix} and hold inbound, ${dirTurns} turns, ${legLength} legs`];
@@ -1999,6 +1999,7 @@ export default class Aircraft {
             runway  = airport.getRunway(this.rwy_arr);
             offset = getOffset(this, runway.position, runway.angle);
             offset_angle = vradial(offset);
+            const assignedHdg = this.fms.currentWaypoint().heading;
             this.offset_angle = offset_angle;
             this.approachOffset = abs(offset[0]);
             this.approachDistance = offset[1];
@@ -2021,14 +2022,13 @@ export default class Aircraft {
             }
 
             // lock ILS if at the right angle and altitude
-            if (this.altitude < (glideslope_altitude + glideslope_window)
-                && (abs(offset_angle) < degreesToRadians(10))
-                && (offset[1] < ils)
-            ) {
-                if (abs(offset[0]) < 0.05 && this.mode !== FLIGHT_MODES.LANDING) {
+            if (offset[1] < ils) {
+                if (abs(offset[0]) < 0.05 && abs(this.heading - angle) < degreesToRadians(5)
+                    && this.mode !== FLIGHT_MODES.LANDING)
+                {
                     this.mode = FLIGHT_MODES.LANDING;
 
-                    if (!this.projected && (abs(angle_offset(this.fms.currentWaypoint().heading,
+                    if (!this.projected && (abs(angle_offset(assignedHdg,
                         degreesToRadians(parseInt(this.rwy_arr.substr(0, 2), 10) * 10, 10))) > degreesToRadians(30))
                     ) {
                         const isWarning = true;
@@ -2048,12 +2048,24 @@ export default class Aircraft {
                 const dist_to_localizer = offset[0] / sin(angle_diff); // dist from the localizer intercept point, km
 
                 if (dist_to_localizer <= turning_radius || dist_to_localizer < 0.5) {
-                    this.target.heading = angle;
-
                     // Steer to within 3m of the centerline while at least 200m out
                     if (offset[1] > 0.2 && abs(offset[0]) > 0.003) {
-                        // TODO: enumerate the magic numbers
-                        this.target.heading = _clamp(degreesToRadians(-30), -12 * offset_angle, degreesToRadians(30)) + angle;
+                        const severity_of_correction = 12;  // controls steepness of heading adjustments during localizer tracking
+                        const tgtHdg = angle + (offset_angle * -severity_of_correction);
+                        let minHdg = null;
+                        let maxHdg = null;
+                        if (!assignedHdg) {  // interception via fixes
+                            // TODO: uh.... do this.
+                        }
+                        else if (assignedHdg > angle) { // left turn onto the localizer
+                            minHdg = angle - degreesToRadians(30);  // allow a 30 degree overturn to accommodate overshoots
+                            maxHdg = assignedHdg;
+                        }
+                        else if (assignedHdg < angle) { // right turn onto localizer
+                            minHdg = assignedHdg;
+                            maxHdg = angle + degreesToRadians(30);  // allow a 30 degree overturn to accommodate overshoots
+                        }
+                        this.target.heading = _clamp(tgtHdg, minHdg, maxHdg);
                     }
 
                     // Follow the glideslope
@@ -2066,7 +2078,8 @@ export default class Aircraft {
                 }
 
                 this.target.speed = crange(3, offset[1], 10, this.model.speed.landing, this.fms.currentWaypoint().start_speed);
-            } else if ((this.altitude - runway_elevation) >= 300 && this.mode === FLIGHT_MODES.LANDING) {
+            }
+            else if ((this.altitude - runway_elevation) >= 300 && this.mode === FLIGHT_MODES.LANDING) {
                 this.updateStrip();
                 this.cancelLanding();
 
@@ -2080,8 +2093,9 @@ export default class Aircraft {
 
                     prop.game.score.abort.landing += 1;
                 }
-            } else if (this.altitude >= 300) {
-                this.target.heading = this.fms.currentWaypoint().heading;
+            }
+            else if (this.altitude >= 300) {
+                this.target.heading = assignedHdg;
                 this.target.turn = this.fms.currentWaypoint().turn;
             }
 
@@ -2091,7 +2105,9 @@ export default class Aircraft {
             if (this.isLanded()) {
                 this.target.speed = 0;
             }
-        } else if (this.fms.currentWaypoint().navmode === WAYPOINT_NAV_MODE.FIX) {
+        }
+
+        else if (this.fms.currentWaypoint().navmode === WAYPOINT_NAV_MODE.FIX) {
             const fix = this.fms.currentWaypoint().location;
             if (!fix) {
                 console.error(`${this.getCallsign()} using "fix" navmode, but no fix location!`);
@@ -2118,7 +2134,9 @@ export default class Aircraft {
                 this.target.heading = vradial(vector_to_fix) - Math.PI;
                 this.target.turn = null;
             }
-        } else if (this.fms.currentWaypoint().navmode === WAYPOINT_NAV_MODE.HOLD) {
+        }
+
+        else if (this.fms.currentWaypoint().navmode === WAYPOINT_NAV_MODE.HOLD) {
             const hold = this.fms.currentWaypoint().hold;
             const angle_off_of_leg_hdg = abs(angle_offset(this.heading, this.target.heading));
 
@@ -2149,7 +2167,9 @@ export default class Aircraft {
                     }
                 }
             }
-        } else {
+        }
+
+        else {
             this.target.heading = this.fms.currentWaypoint().heading;
             this.target.turn = this.fms.currentWaypoint().turn;
         }
@@ -2261,6 +2281,7 @@ export default class Aircraft {
         }
 
         // TURNING
+        // this.target.heading = radians_normalize(this.target.heading);
         if (!this.isLanded() && this.heading !== this.target.heading) {
             // Perform standard turns 3 deg/s or 25 deg bank, whichever
             // requires less bank angle.
