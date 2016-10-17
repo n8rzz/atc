@@ -9,7 +9,7 @@ import _uniq from 'lodash/uniq';
 import Area from '../base/AreaModel';
 import PositionModel from '../base/PositionModel';
 import RunwayModel from './RunwayModel';
-import SidCollection from './StandardRoute/SidCollection';
+import StandardRouteCollection from './StandardRoute/StandardRouteCollection';
 import { ArrivalFactory } from './Arrival/ArrivalFactory';
 import { DepartureFactory } from './Departure/DepartureFactory';
 import { degreesToRadians, parseElevation } from '../utilities/unitConverters';
@@ -69,7 +69,9 @@ export default class AirportModel {
         // TODO: what is the difference between a `real_fix` and `fix`?
         this.real_fixes = {};
         this.sids     = {};
+        this.sidCollection = null;
         this.stars    = {};
+        this.starCollection = null;
         this.maps     = {};
         this.airways  = {};
         this.restricted_areas = [];
@@ -112,9 +114,10 @@ export default class AirportModel {
     parse(data) {
         this.setCurrentPosition(data.position, data.magnetic_north);
 
-        this.name = _get(data, 'name', null);
-        this.icao = _get(data, 'icao', null);
-        this.radio = _get(data, 'radio', null);
+        this.name = _get(data, 'name', this.name);
+        this.icao = _get(data, 'icao', this.icao);
+        this.radio = _get(data, 'radio', this.radio);
+        this.level = _get(data, 'level', this.level);
         this.has_terrain = _get(data, 'has_terrain', false);
         this.stars = _get(data, 'stars', {});
         this.airways = _get(data, 'airways', {});
@@ -123,8 +126,8 @@ export default class AirportModel {
         this.initial_alt = _get(data, 'initial_alt', DEFAULT_INITIAL_ALTITUDE_FT);
         this.rr_radius_nm = _get(data, 'rr_radius_nm');
         this.rr_center = _get(data, 'rr_center');
-        this.level = _get(data, 'level', null);
-        this.sidCollection = new SidCollection(data.sids);
+        this.sidCollection = new StandardRouteCollection(data.sids);
+        this.starCollection = new StandardRouteCollection(data.stars);
 
         this.loadTerrain();
         this.buildAirportAirspace(data.airspace);
@@ -137,7 +140,7 @@ export default class AirportModel {
         this.buildAirportDepartures(data.departures);
         this.buildArrivals(data.arrivals);
         this.checkFixes();
-        this.buildRunwayMetaData()
+        this.buildRunwayMetaData();
     }
 
     /**
@@ -168,7 +171,7 @@ export default class AirportModel {
         const areas = [];
 
         // for each area
-        _forEach(airspace, (airspaceSection, i) => {
+        _forEach(airspace, (airspaceSection) => {
             const positions = [];
 
             // for each point
@@ -293,7 +296,7 @@ export default class AirportModel {
             this.maps[key] = [];
             const lines = map;
 
-            _forEach(lines, (line, i) => {
+            _forEach(lines, (line) => {
                 const start = new PositionModel([line[0], line[1]], this.position, this.magnetic_north).position;
                 const end = new PositionModel([line[2], line[3]], this.position, this.magnetic_north).position;
 
@@ -308,7 +311,7 @@ export default class AirportModel {
      * @param restrictedAreas
      */
     buildRestrictedAreas(restrictedAreas) {
-        if (restrictedAreas) {
+        if (!restrictedAreas) {
             return;
         }
 
@@ -362,7 +365,7 @@ export default class AirportModel {
 
     buildAirportDepartures(departures) {
         if (!departures) {
-            return ;
+            return;
         }
 
         this.departures = DepartureFactory(this, departures);
@@ -404,7 +407,7 @@ export default class AirportModel {
                     }
 
                     for (const rwy2end in this.runways[rwy2]) {
-                        //setup secondary runway subobject
+                        // setup secondary runway subobject
                         const r1 = this.runways[rwy1][rwy1end];
                         const r2 = this.runways[rwy2][rwy2end];
                         const offset = getOffset(r1, r2.position, r1.angle);
@@ -421,23 +424,10 @@ export default class AirportModel {
         }
     }
 
-    getWind() {
-        // TODO: there are a lot of magic numbers here. What are they for and what do they mean? These should be enumerated.
-        const wind = clone(this.wind);
-        let s = 1;
-        const angle_factor = sin((s + window.gameController.game_time()) * 0.5) + sin((s + window.gameController.game_time()) * 2);
-        // TODO: why is this var getting reassigned to a magic number?
-        s = 100;
-        const speed_factor = sin((s + window.gameController.game_time()) * 0.5) + sin((s + window.gameController.game_time()) * 2);
-        wind.angle += crange(-1, angle_factor, 1, degreesToRadians(-4), degreesToRadians(4));
-        wind.speed *= crange(-1, speed_factor, 1, 0.9, 1.05);
-
-        return wind;
-    }
-
     set() {
         if (!this.loaded) {
             this.load();
+
             return;
         }
 
@@ -544,11 +534,13 @@ export default class AirportModel {
             }
 
             let multipoly = f.geometry.coordinates;
-            if (f.geometry.type == 'LineString') {
+            // TODO: add enumeration
+            if (f.geometry.type === 'LineString') {
                 multipoly = [[multipoly]];
             }
 
-            if (f.geometry.type == 'Polygon') {
+            // TODO: add enumeration
+            if (f.geometry.type === 'Polygon') {
                 multipoly = [multipoly];
             }
 
@@ -558,8 +550,9 @@ export default class AirportModel {
                 apt.terrain[ele].push($.map(poly, (line_string) => {
                     return [
                         $.map(line_string, (pt) => {
-                            var pos = new PositionModel(pt, apt.position, apt.magnetic_north);
+                            const pos = new PositionModel(pt, apt.position, apt.magnetic_north);
                             pos.parse4326();
+
                             return [pos.position];
                         })
                     ];
@@ -659,42 +652,7 @@ export default class AirportModel {
      *
      */
     getSID(id, exit, rwy) {
-        const fixes = this.sidCollection.findFixesForSidByRunwayAndExit(id, exit, rwy);
-
-        // // runway portion
-        // if (_has(sid.rwy, rwy)) {
-        //     for (let i = 0; i < sid.rwy[rwy].length; i++) {
-        //         if (typeof sid.rwy[rwy][i] === 'string') {
-        //             fixes.push([sid.rwy[rwy][i], null]);
-        //         } else {
-        //             fixes.push(sid.rwy[rwy][i]);
-        //         }
-        //     }
-        // }
-        //
-        // // body portion
-        // if (_has(sid, 'body')) {
-        //     for (let i = 0; i < sid.body.length; i++) {
-        //         if (typeof sid.body[i] === 'string') {
-        //             fixes.push([sid.body[i], null]);
-        //         } else {
-        //             fixes.push(sid.body[i]);
-        //         }
-        //     }
-        // }
-        //
-        // // exit portion
-        // if (_has(sid, 'exitPoints')) {
-        //     for (let i = 0; i < sid.exitPoints[exit].length; i++) {
-        //         if (typeof sid.exitPoints[exit][i] === 'string') {
-        //             fixes.push([sid.exitPoints[exit][i], null]);
-        //         } else {
-        //             fixes.push(sid.exitPoints[exit][i]);
-        //         }
-        //     }
-        // }
-
-        return fixes;
+        return this.sidCollection.findFixesForSidByRunwayAndExit(id, exit, rwy);
     }
 
     /**
@@ -704,13 +662,13 @@ export default class AirportModel {
      * @return {string}  Name of Exit fix in SID
      */
     getSIDExitPoint(icao) {
-        return this.sidCollection.getRandomExitPointForSIDIcao(icao);
+        return this.sidCollection.findRandomExitPointForSIDIcao(icao);
     }
 
     // FIXME: possibly unused
     getSIDName(id, rwy) {
         console.warn('AirportModel.getSIDName() IS IN USE: ', id, rwy);
-        debugger;
+
         if (_has(this.sids[id], 'suffix')) {
             return `${this.sids[id].name} ${this.sids[id].suffix[rwy]}`;
         }
@@ -721,6 +679,7 @@ export default class AirportModel {
     // FIXME: possibly unused
     getSIDid(id, rwy) {
         console.warn('AirportModel.getSIDid IS IN USE: ', id, rwy);
+
         if (_has(this.sids[id], 'suffix')) {
             return this.sids[id].icao + this.sids[id].suffix[rwy];
         }
@@ -730,6 +689,7 @@ export default class AirportModel {
 
     /**
       * Return an array of [Waypoint, fixRestrictions] for a given STAR
+      *
       * @param {string} id - the identifier for the STAR (eg 'LENDY6')
       * @param {string} entry - the entryPoint from which to join the STAR
       * @param {string} rwy - (optional) the planned arrival runway
@@ -740,48 +700,8 @@ export default class AirportModel {
       *       it will cause an incomplete route in many cases (depends on the
       *       design of the actual STAR in the airport's json file).
      */
-    getSTAR(id, entry, /* optional */ rwy) {
-        if (!(id && entry) || Object.keys(this.stars).indexOf(id) === -1) {
-            return null;
-        }
-
-        const fixes = [];
-        const star = this.stars[id];
-
-        // entry portion
-        if (_has(star, 'entryPoints')) {
-            for (let i = 0; i < star.entryPoints[entry].length; i++) {
-                if (typeof star.entryPoints[entry][i] === 'string') {
-                    fixes.push([star.entryPoints[entry][i], null]);
-                } else {
-                    fixes.push(star.entryPoints[entry][i]);
-                }
-            }
-        }
-
-        // body portion
-        if (_has(star, 'body')) {
-            for (let i = 0; i < star.body.length; i++) {
-                if (typeof star.body[i] === 'string') {
-                    fixes.push([star.body[i], null]);
-                } else {
-                    fixes.push(star.body[i]);
-                }
-            }
-        }
-
-        // runway portion
-        if (star.rwy && _has(star.rwy, rwy)) {
-            for (let i = 0; i < star.rwy[rwy].length; i++) {
-                if (typeof star.rwy[rwy][i] === 'string') {
-                    fixes.push([star.rwy[rwy][i], null]);
-                } else {
-                    fixes.push(star.rwy[rwy][i]);
-                }
-            }
-        }
-
-        return fixes;
+    getSTAR(id, entry, rwy) {
+        return this.starCollection.findFixesForStarByEntryAndRunway(id, entry, rwy);
     }
 
     getRunway(name) {
@@ -856,8 +776,8 @@ export default class AirportModel {
 
                 // draw portion
                 if (_has(this.sids[s], 'draw')) {
-                    for(let i in this.sids[s].draw) {
-                        for(let j = 0; j < this.sids[s].draw[i].length; j++) {
+                    for (let i in this.sids[s].draw) {
+                        for (let j = 0; j < this.sids[s].draw[i].length; j++) {
                             fixes.push(this.sids[s].draw[i][j].replace('*', ''));
                         }
                     }
@@ -879,7 +799,6 @@ export default class AirportModel {
                             }
                         }
                     }
-
                 }
 
                 // body portion
