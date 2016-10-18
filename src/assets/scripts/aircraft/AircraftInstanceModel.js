@@ -1,6 +1,4 @@
-/* eslint-disable camelcase, no-underscore-dangle, no-mixed-operators, func-names, object-shorthand, no-undef, guard-for-in, no-restricted-syntax, max-len, prefer-arrow-callback, */
 import $ from 'jquery';
-import _clamp from 'lodash/clamp';
 import _forEach from 'lodash/forEach';
 import _get from 'lodash/get';
 import _has from 'lodash/has';
@@ -12,7 +10,7 @@ import AircraftStripView from './AircraftStripView';
 import Waypoint from './Waypoint';
 import { speech_say } from '../speech';
 import { tau, radians_normalize, angle_offset } from '../math/circle';
-import { round, abs, sin, cos, extrapolate_range_clamp } from '../math/core';
+import { round, abs, sin, cos, extrapolate_range_clamp, clamp } from '../math/core';
 import { distance2d } from '../math/distance';
 import { getOffset } from '../math/flightMath';
 import {
@@ -932,7 +930,7 @@ export default class Aircraft {
 
         this.fms.setAll({
             // TODO: enumerate the magic numbers
-            altitude: _clamp(round(window.airportController.airport_get().elevation / 100) * 100 + 1000, altitude, ceiling),
+            altitude: clamp(round(window.airportController.airport_get().elevation / 100) * 100 + 1000, altitude, ceiling),
             expedite: expedite
         });
 
@@ -1029,7 +1027,7 @@ export default class Aircraft {
         }
 
         this.fms.setAll({
-            speed: _clamp(
+            speed: clamp(
                 this.model.speed.min,
                 speed,
                 this.model.speed.max
@@ -1975,7 +1973,7 @@ export default class Aircraft {
      */
     updateTarget() {
         let airport = window.airportController.airport_get();
-        let runway  = null;
+        let runway = null;
         let offset = null;
         let offset_angle = null;
         let glideslope_altitude = null;
@@ -1998,7 +1996,7 @@ export default class Aircraft {
             offset = getOffset(this, runway.position, runway.angle);
             offset_angle = vradial(offset);
             angle = radians_normalize(runway.angle);
-            glideslope_altitude = _clamp(0, runway.getGlideslopeAltitude(offset[1]), this.altitude);
+            glideslope_altitude = clamp(0, runway.getGlideslopeAltitude(offset[1]), this.altitude);
             const assignedHdg = this.fms.currentWaypoint().heading;
             const localizerRange = runway.ils.enabled ? runway.ils.loc_maxDist : 40;
             this.offset_angle = offset_angle;
@@ -2016,7 +2014,7 @@ export default class Aircraft {
                 const tgtHdg = angle + (offset_angle * -severity_of_correction);
                 const minHdg = angle - degreesToRadians(30);
                 const maxHdg = angle + degreesToRadians(30);
-                this.target.heading = _clamp(tgtHdg, minHdg, maxHdg);
+                this.target.heading = clamp(tgtHdg, minHdg, maxHdg);
 
                 // Final Approach Altitude Control
                 this.target.altitude = Math.min(this.fms.currentWaypoint().altitude, glideslope_altitude);
@@ -2025,14 +2023,18 @@ export default class Aircraft {
                 if (this.fms.currentWaypoint().speed > 0) {
                     this.fms.setCurrent({ start_speed: this.fms.currentWaypoint().speed });
                 }
+
                 if (this.isLanded()) {
                     this.target.speed = 0;
                 } else {
                     const dist_final_app_spd = 3.5; // 3.5km ~= 2nm
                     const dist_assigned_spd = 9.5;  // 9.5km ~= 5nm
-                    this.target.speed = extrapolate_range_clamp(dist_final_app_spd, offset[1], dist_assigned_spd,
-                                            this.model.speed.landing, this.fms.currentWaypoint().start_speed);
-                    if(!this.projected) console.log(`start_speed:${this.fms.currentWaypoint().start_speed}  |  targetSpd:${this.target.speed}`);
+                    this.target.speed = extrapolate_range_clamp(
+                        dist_final_app_spd, offset[1],
+                        dist_assigned_spd,
+                        this.model.speed.landing,
+                        this.fms.currentWaypoint().start_speed
+                    );
                 }
 
                 // Failed Approach
@@ -2096,12 +2098,13 @@ export default class Aircraft {
                 const turn_early_km = 1;    // start turn 1km early, to avoid overshoots from tailwind
                 const should_attempt_intercept = (0 < dist_to_localizer && dist_to_localizer <= turning_radius + turn_early_km);
                 const in_the_window = abs(offset_angle) < degreesToRadians(1.5);  // if true, aircraft will move to localizer, regardless of assigned heading
+
                 if (should_attempt_intercept || in_the_window) {  // time to begin turn
                     const severity_of_correction = 50;  // controls steepness of heading adjustments during localizer tracking
                     const tgtHdg = angle + (offset_angle * -severity_of_correction);
                     const minHdg = angle - degreesToRadians(30);
                     const maxHdg = angle + degreesToRadians(30);
-                    this.target.heading = _clamp(tgtHdg, minHdg, maxHdg);
+                    this.target.heading = clamp(tgtHdg, minHdg, maxHdg);
                 }
             }
         } else if (this.fms.currentWaypoint().navmode === WAYPOINT_NAV_MODE.FIX) {
@@ -2172,7 +2175,7 @@ export default class Aircraft {
             this.target.expedite = this.fms.currentWaypoint().expedite;
             this.target.altitude = Math.max(1000, this.target.altitude);
             this.target.speed = this.fms.currentWaypoint().speed;
-            this.target.speed = _clamp(this.model.speed.min, this.target.speed, this.model.speed.max);
+            this.target.speed = clamp(this.model.speed.min, this.target.speed, this.model.speed.max);
         }
 
         // If stalling, make like a meteorite and fall to the earth!
@@ -2279,7 +2282,7 @@ export default class Aircraft {
             // Perform standard turns 3 deg/s or 25 deg bank, whichever
             // requires less bank angle.
             // Formula based on http://aviation.stackexchange.com/a/8013
-            const turn_rate = _clamp(0, 1 / (this.speed / 8.883031), 0.0523598776);
+            const turn_rate = clamp(0, 1 / (this.speed / 8.883031), 0.0523598776);
             const turn_amount = turn_rate * window.gameController.game_delta();
             const offset = angle_offset(this.target.heading, this.heading);
 

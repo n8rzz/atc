@@ -2,6 +2,7 @@ import _isNumber from 'lodash/isNumber';
 
 /**
  * @function round
+ * @return {number}
  */
 export const round = (n, factor = 1) => {
     return Math.round(n / factor) * factor;
@@ -9,6 +10,7 @@ export const round = (n, factor = 1) => {
 
 /**
  * @function abs
+ * @return {number}
  */
 export const abs = (n) => {
     return Math.abs(n);
@@ -68,17 +70,14 @@ export const s = (i) => {
 // TODO: rename to isWithin
 /**
  * @function within
+ * @param n
+ * @param c
+ * @param r
  * @return {number}
  */
 export const within = (n, c, r) => {
     return n > (c + r) || n < (c - r);
 };
-
-
-// TODO: update references to use exports instead of functions attached to window
-// window.randint = randint;
-// window.s = s;
-// window.within = within;
 
 // TODO: add a divisor paramater that dfaults to `2`
 /**
@@ -105,6 +104,47 @@ export const calculateMiddle = (value = 0) => {
  */
 export const mod = (firstValue, secondValue) => {
     return ((firstValue % secondValue) + secondValue) % secondValue;
+};
+
+/**
+ * Clamp a value to be within a certain range
+ *
+ * @function clamp
+ * @param min {number}
+ * @param valueToClamp {number}
+ * @param max {number} (optional)
+ * @return {number}
+ */
+export const clamp = (min, valueToClamp, max = Infinity) => {
+    let temp;
+
+    if (!_isNumber(valueToClamp)) {
+        throw new TypeError('Invalid parameter. Expected `valueToClamp` to be a number');
+    }
+
+    if (max === Infinity) {
+        if (min > valueToClamp) {
+            return min;
+        }
+
+        return valueToClamp;
+    }
+
+    if (min > max) {
+        temp = max;
+        max = min;
+        min = temp;
+    }
+
+    if (min > valueToClamp) {
+        return min;
+    }
+
+    if (max < valueToClamp) {
+        return max;
+    }
+
+    return valueToClamp;
 };
 
 /**
@@ -137,5 +177,6 @@ const extrapolate_range = (range1_min, target_val, range1_max, range2_min, range
  */
 export const extrapolate_range_clamp = (range1_min, target_val, range1_max, range2_min, range2_max) => {
     const extrapolation_result = extrapolate_range(range1_min, target_val, range1_max, range2_min, range2_max);
+
     return clamp(extrapolation_result, range2_min, range2_max);
 };
