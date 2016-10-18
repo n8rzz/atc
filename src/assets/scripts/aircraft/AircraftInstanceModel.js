@@ -12,7 +12,7 @@ import AircraftStripView from './AircraftStripView';
 import Waypoint from './Waypoint';
 import { speech_say } from '../speech';
 import { tau, radians_normalize, angle_offset } from '../math/circle';
-import { round, abs, sin, cos, crange } from '../math/core';
+import { round, abs, sin, cos, extrapolate_range_clamp } from '../math/core';
 import { distance2d } from '../math/distance';
 import { getOffset } from '../math/flightMath';
 import {
@@ -2077,7 +2077,7 @@ export default class Aircraft {
                     this.fms.setCurrent({ start_speed: this.fms.currentWaypoint().speed });
                 }
 
-                this.target.speed = crange(3, offset[1], 10, this.model.speed.landing, this.fms.currentWaypoint().start_speed);
+                this.target.speed = extrapolate_range_clamp(3, offset[1], 10, this.model.speed.landing, this.fms.currentWaypoint().start_speed);
             }
             else if ((this.altitude - runway_elevation) >= 300 && this.mode === FLIGHT_MODES.LANDING) {
                 this.updateStrip();
@@ -2352,7 +2352,7 @@ export default class Aircraft {
             }
         } else if (this.target.speed > this.speed + 0.01) {
             difference  = this.model.rate.accelerate * window.gameController.game_delta() / 2;
-            difference *= crange(0, this.speed, this.model.speed.min, 2, 1);
+            difference *= extrapolate_range_clamp(0, this.speed, this.model.speed.min, 2, 1);
         }
 
         if (difference) {

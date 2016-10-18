@@ -110,33 +110,33 @@ export const mod = (firstValue, secondValue) => {
 
 // TODO: find better names/enumerate the params for these next two functions
 /**
- * @function trange
- * @param il {number}
- * @param i {number}
- * @param ih {number}
- * @param ol {number}
- * @param oh {number}
- * @return {number}
+ * Takes a value's position relative to a given range, and extrapolates to another range.
+ * Note: Return will be outside range2 if target_val is outside range1.
+ *       If you wish to clamp it within range2, use extrapolate_range_clamp.
+ * @function extrapolate_range
+ * @param  {number} range1_min minimum value of range 1
+ * @param  {number} target_val target value within range 1
+ * @param  {number} range1_max maximum value of range 1
+ * @param  {number} range2_min minimum value of range 2
+ * @param  {number} range2_max maximum value of range 2
+ * @return {number}            target value wihtin range 2
  */
-const trange = (il, i, ih, ol, oh) => {
-    return ol + (oh - ol) * (i - il) / (ih - il);
-    // i=(i/(ih-il))-il;       // purpose unknown
-    // return (i*(oh-ol))+ol;  // purpose unknown
+const extrapolate_range = (range1_min, target_val, range1_max, range2_min, range2_max) => {
+    return range2_min + (range2_max - range2_min) * (target_val - range1_min) / (range1_max - range1_min);
 };
 
 /**
- * @function crange
- * @param il {number}
- * @param i {number}
- * @param ih {number}
- * @param ol {number}
- * @param oh {number}
- * @return {number}
+ * Takes a value's position relative to a given range, and extrapolates to (and clamps within) another range.
+ * Note: Return will be clamped within range2, even if target_val is outside range1.
+ *       If you wish to allow extrapolation beyond the bounds of range2, us extrapolate_range.
+ * @function extrapolate_range_clamp
+ * @param  {number} range1_min minimum value of range1
+ * @param  {number} target_val target value relative to range1
+ * @param  {number} range1_max maximum value of range1
+ * @param  {number} range2_min minimum value of range2
+ * @param  {number} range2_max maximum value of range2
+ * @return {number}            target value within range2
  */
-export const crange = (il, i, ih, ol, oh) => {
-    return _clamp(
-        ol,
-        trange(il, i, ih, ol, oh),
-        oh
-    );
+export const extrapolate_range_clamp = (range1_min, target_val, range1_max, range2_min, range2_max) => {
+    return _clamp(extrapolate_range(range1_min, target_val, range1_max, range2_min, range2_max), range2_min, range2_max);
 };
