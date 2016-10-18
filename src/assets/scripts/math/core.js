@@ -1,4 +1,3 @@
-import _clamp from 'lodash/clamp';
 import _isNumber from 'lodash/isNumber';
 
 /**
@@ -108,7 +107,6 @@ export const mod = (firstValue, secondValue) => {
     return ((firstValue % secondValue) + secondValue) % secondValue;
 };
 
-// TODO: find better names/enumerate the params for these next two functions
 /**
  * Takes a value's position relative to a given range, and extrapolates to another range.
  * Note: Return will be outside range2 if target_val is outside range1.
@@ -138,5 +136,6 @@ const extrapolate_range = (range1_min, target_val, range1_max, range2_min, range
  * @return {number}            target value within range2
  */
 export const extrapolate_range_clamp = (range1_min, target_val, range1_max, range2_min, range2_max) => {
-    return _clamp(extrapolate_range(range1_min, target_val, range1_max, range2_min, range2_max), range2_min, range2_max);
+    const extrapolation_result = extrapolate_range(range1_min, target_val, range1_max, range2_min, range2_max);
+    return clamp(extrapolation_result, range2_min, range2_max);
 };
