@@ -315,12 +315,13 @@ export default class Aircraft {
 
             this.destination = data.destination;
             this.setArrivalRunway(window.airportController.airport_get(this.destination).runway);
-        } else if (this.category === FLIGHT_CATEGORY.DEPARTURE && this.wow()) {
-            this.speed = 0;
+        } else if (this.category === FLIGHT_CATEGORY.DEPARTURE) {
+            const airport = window.airportController.airport_get();
             this.mode = FLIGHT_MODES.APRON;
             this.destination = data.destination;
-
-            this.setDepartureRunway(window.airportController.airport_get().runway);
+            this.setDepartureRunway(airport.runway);
+            this.altitude = airport.position.elevation;
+            this.speed = 0;
         }
 
         if (data.heading) {
@@ -1973,7 +1974,7 @@ export default class Aircraft {
             offset = getOffset(this, runway.position, runway.angle);
             offset_angle = vradial(offset);
             angle = radians_normalize(runway.angle);
-            glideslope_altitude = clamp(0, runway.getGlideslopeAltitude(offset[1]), this.altitude);
+            glideslope_altitude = clamp(runway.elevation, runway.getGlideslopeAltitude(offset[1]), this.altitude);
             const assignedHdg = this.fms.currentWaypoint().heading;
             const localizerRange = runway.ils.enabled ? runway.ils.loc_maxDist : 40;
             this.offset_angle = offset_angle;
@@ -2002,6 +2003,7 @@ export default class Aircraft {
                 }
 
                 if (this.wow()) {
+                    this.target.altitude = runway.elevation;
                     this.target.speed = 0;
                 } else {
                     const dist_final_app_spd = 3.5; // 3.5km ~= 2nm
@@ -2156,8 +2158,8 @@ export default class Aircraft {
         }
 
         // If stalling, make like a meteorite and fall to the earth!
-        if (this.speed < this.model.speed.min) {
-            this.target.altitude = 0;
+        if (this.speed < this.model.speed.min && !this.wow()) {
+            this.target.altitude = Math.min(0, this.target.altitude);
         }
 
         // finally, taxi overrides everything
