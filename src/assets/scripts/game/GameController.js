@@ -67,47 +67,7 @@ export default class GameController {
      * @method init_pre
      */
     init_pre() {
-        prop.game = {};
-        prop.game.paused = true;
-        prop.game.focused = true;
-        prop.game.speedup = 1;
-        prop.game.frequency = 1;
-        prop.game.time = 0;
-        prop.game.delta = 0;
-        prop.game.timeouts = [];
-
-        $(window).blur(() => {
-            prop.game.focused = false;
-        });
-
-        $(window).focus(() => {
-            prop.game.focused = true;
-        });
-
-        prop.game.last_score = 0;
-        prop.game.score = {
-            arrival: 0,
-            departure: 0,
-
-            windy_landing: 0,
-            windy_takeoff: 0,
-
-            failed_arrival: 0,
-            failed_departure: 0,
-
-            warning: 0,
-            hit: 0,
-
-            abort: {
-                landing: 0,
-                taxi: 0
-            },
-
-            violation: 0,
-            restrictions: 0
-        };
-
-        prop.game.option = new GameOptions();
+        prop.game = game;
     }
 
     /**
@@ -117,23 +77,23 @@ export default class GameController {
     game_get_score() {
         let score = 0;
 
-        score += prop.game.score.arrival * 10;
-        score += prop.game.score.departure * 10;
+        score += this.game.score.arrival * 10;
+        score += this.game.score.departure * 10;
 
-        score -= prop.game.score.windy_landing * 0.5;
-        score -= prop.game.score.windy_takeoff * 0.5;
+        score -= this.game.score.windy_landing * 0.5;
+        score -= this.game.score.windy_takeoff * 0.5;
 
-        score -= prop.game.score.failed_arrival * 20;
-        score -= prop.game.score.failed_departure * 2;
+        score -= this.game.score.failed_arrival * 20;
+        score -= this.game.score.failed_departure * 2;
 
-        score -= prop.game.score.warning * 5;
-        score -= prop.game.score.hit * 50;
+        score -= this.game.score.warning * 5;
+        score -= this.game.score.hit * 50;
 
-        score -= prop.game.score.abort.landing * 5;
-        score -= prop.game.score.abort.taxi * 2;
+        score -= this.game.score.abort.landing * 5;
+        score -= this.game.score.abort.taxi * 2;
 
-        score -= prop.game.score.violation;
-        score -= prop.game.score.restrictions * 10;
+        score -= this.game.score.violation;
+        score -= this.game.score.restrictions * 10;
 
         return score;
     }
@@ -156,17 +116,17 @@ export default class GameController {
      * @method game_reset_score
      */
     game_reset_score() {
-        prop.game.score.abort = { landing: 0, taxi: 0 };
-        prop.game.score.arrival = 0;
-        prop.game.score.departure = 0;
-        prop.game.score.failed_arrival = 0;
-        prop.game.score.failed_departure = 0;
-        prop.game.score.hit = 0;
-        prop.game.score.restrictions = 0;
-        prop.game.score.violation = 0;
-        prop.game.score.warning = 0;
-        prop.game.score.windy_landing = 0;
-        prop.game.score.windy_takeoff = 0;
+        this.game.score.abort = { landing: 0, taxi: 0 };
+        this.game.score.arrival = 0;
+        this.game.score.departure = 0;
+        this.game.score.failed_arrival = 0;
+        this.game.score.failed_departure = 0;
+        this.game.score.hit = 0;
+        this.game.score.restrictions = 0;
+        this.game.score.violation = 0;
+        this.game.score.warning = 0;
+        this.game.score.windy_landing = 0;
+        this.game.score.windy_takeoff = 0;
     }
 
     /**
@@ -176,18 +136,18 @@ export default class GameController {
     game_timewarp_toggle() {
         const $fastForwards = $(`.${SELECTORS.CLASSNAMES.FAST_FORWARDS}`);
 
-        if (prop.game.speedup === 5) {
-            prop.game.speedup = 1;
+        if (this.game.speedup === 5) {
+            this.game.speedup = 1;
 
             $fastForwards.removeClass(SELECTORS.CLASSNAMES.SPEED_5);
             $fastForwards.prop('title', 'Set time warp to 2');
-        } else if (prop.game.speedup === 1) {
-            prop.game.speedup = 2;
+        } else if (this.game.speedup === 1) {
+            this.game.speedup = 2;
 
             $fastForwards.addClass(SELECTORS.CLASSNAMES.SPEED_2);
             $fastForwards.prop('title', 'Set time warp to 5');
         } else {
-            prop.game.speedup = 5;
+            this.game.speedup = 5;
 
             $fastForwards.removeClass(SELECTORS.CLASSNAMES.SPEED_2);
             $fastForwards.addClass(SELECTORS.CLASSNAMES.SPEED_5);
@@ -201,7 +161,7 @@ export default class GameController {
      */
     game_pause() {
         const $pauseToggle = $(`.${SELECTORS.CLASSNAMES.PAUSE_TOGGLE}`);
-        prop.game.paused = true;
+        this.game.paused = true;
 
         $pauseToggle.addClass(SELECTORS.CLASSNAMES.ACTIVE);
         $pauseToggle.attr('title', 'Resume simulation');
@@ -214,7 +174,7 @@ export default class GameController {
      */
     game_unpause() {
         const $pauseToggle = $(`.${SELECTORS.CLASSNAMES.PAUSE_TOGGLE}`);
-        prop.game.paused = false;
+        this.game.paused = false;
 
         $pauseToggle.removeClass(SELECTORS.CLASSNAMES.ACTIVE);
         $pauseToggle.attr('title', 'Pause simulation');
@@ -227,7 +187,7 @@ export default class GameController {
      */
     game_pause_toggle() {
         // TODO: simplify if/else logic. should only need an if with an early exit
-        if (prop.game.paused) {
+        if (this.game.paused) {
             this.game_unpause();
         } else {
             this.game_pause();
@@ -240,7 +200,7 @@ export default class GameController {
      * @return
      */
     game_paused() {
-        return !prop.game.focused || prop.game.paused;
+        return !this.game.focused || this.game.paused;
     }
 
     /**
@@ -249,7 +209,7 @@ export default class GameController {
      * @return {number}
      */
     game_time() {
-        return prop.game.time;
+        return this.game.time;
     }
 
     /**
@@ -258,7 +218,7 @@ export default class GameController {
      * @return {number}
      */
     game_delta() {
-        return prop.game.delta;
+        return this.game.delta;
     }
 
     /**
@@ -267,7 +227,7 @@ export default class GameController {
      * @return
      */
     game_speedup() {
-        return !this.game_paused() ? prop.game.speedup : 0;
+        return !this.game_paused() ? this.game.speedup : 0;
     }
 
     /**
@@ -282,7 +242,7 @@ export default class GameController {
     game_timeout(func, delay, that, data) {
         const to = [func, this.game_time() + delay, data, delay, false, that];
 
-        prop.game.timeouts.push(to);
+        this.game.timeouts.push(to);
 
         return to;
     }
@@ -299,7 +259,7 @@ export default class GameController {
     game_interval(func, delay, that, data) {
         const to = [func, this.game_time() + delay, data, delay, true, that];
 
-        prop.game.timeouts.push(to);
+        this.game.timeouts.push(to);
 
         return to;
     }
@@ -310,7 +270,7 @@ export default class GameController {
      * @param to
      */
     game_clear_timeout(to) {
-        prop.game.timeouts.splice(prop.game.timeouts.indexOf(to), 1);
+        this.game.timeouts.splice(this.game.timeouts.indexOf(to), 1);
     }
 
     /**
@@ -328,7 +288,7 @@ export default class GameController {
             $score.removeClass(SELECTORS.CLASSNAMES.NEGATIVE);
         }
 
-        prop.game.last_score = score;
+        this.game.last_score = score;
     }
 
     /**
@@ -338,23 +298,23 @@ export default class GameController {
     update_pre() {
         const score = this.game_get_score();
 
-        if (score !== prop.game.last_score) {
+        if (score !== this.game.last_score) {
             this.updateScore(score);
         }
 
-        prop.game.delta = Math.min(this.getDeltaTime() * prop.game.speedup, 100);
+        this.game.delta = Math.min(this.getDeltaTime() * this.game.speedup, 100);
 
         if (this.game_paused()) {
-            prop.game.delta = 0;
+            this.game.delta = 0;
         } else {
             $('html').removeClass(SELECTORS.CLASSNAMES.PAUSED);
         }
 
-        prop.game.time += prop.game.delta;
+        this.game.time += this.game.delta;
 
-        for (let i = prop.game.timeouts.length - 1; i >= 0; i--) {
+        for (let i = this.game.timeouts.length - 1; i >= 0; i--) {
             let remove = false;
-            let timeout = prop.game.timeouts[i];
+            let timeout = this.game.timeouts[i];
 
             if (this.game_time() > timeout[1]) {
                 timeout[0].call(timeout[5], timeout[2]);
@@ -367,7 +327,7 @@ export default class GameController {
             }
 
             if (remove) {
-                prop.game.timeouts.splice(i, 1);
+                this.game.timeouts.splice(i, 1);
                 i -= 1;
             }
         }
@@ -378,6 +338,6 @@ export default class GameController {
      * @method complete
      */
     complete() {
-        prop.game.paused = false;
+        this.game.paused = false;
     }
 }

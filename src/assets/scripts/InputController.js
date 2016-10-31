@@ -1,7 +1,7 @@
 /* eslint-disable camelcase, no-mixed-operators, object-shorthand, class-methods-use-this, no-undef, expected-return*/
 import $ from 'jquery';
 import _get from 'lodash/get';
-import _map from 'lodash/map'
+import _map from 'lodash/map';
 import { clamp } from './math/core';
 import { SELECTORS } from './constants/selectors';
 
@@ -177,17 +177,6 @@ export default class InputController {
      */
     input_init_pre() {
         prop.input = input;
-        prop.input.command = '';
-        prop.input.callsign = '';
-        prop.input.data = '';
-        prop.input.history = [];
-        prop.input.history_item = null;
-        prop.input.click = [0, 0];
-        prop.input.positions = '';
-        prop.input.tab_compl = {};
-        prop.input.mouseDelta = [0, 0];
-        prop.input.mouseDown = [0, 0];
-        prop.input.isMouseDown = false;
     }
 
     /**
@@ -209,16 +198,16 @@ export default class InputController {
      * @param event {jquery Event}
      */
     onMouseMoveHandler(event) {
-        if (!prop.input.isMouseDown) {
+        if (!this.input.isMouseDown) {
             return this;
         }
 
-        prop.input.mouseDelta = [
-            event.pageX - prop.input.mouseDown[0],
-            event.pageY - prop.input.mouseDown[1]
+        this.input.mouseDelta = [
+            event.pageX - this.input.mouseDown[0],
+            event.pageY - this.input.mouseDown[1]
         ];
-        prop.canvas.panX = prop.input.mouseDelta[0];
-        prop.canvas.panY = prop.input.mouseDelta[1];
+        prop.canvas.panX = this.input.mouseDelta[0];
+        prop.canvas.panY = this.input.mouseDelta[1];
         prop.canvas.dirty = true;
     }
 
@@ -228,7 +217,7 @@ export default class InputController {
      * @param event {jquery Event}
      */
     onMouseUpHandler(event) {
-        prop.input.isMouseDown = false;
+        this.input.isMouseDown = false;
     }
 
     /**
@@ -243,11 +232,11 @@ export default class InputController {
             window.uiController.ui_zoom_reset();
         } else if (event.which === MOUSE_EVENTS.LEFT_PRESS) {
             // Record mouse down position for panning
-            prop.input.mouseDown = [
+            this.input.mouseDown = [
                 event.pageX - prop.canvas.panX,
                 event.pageY - prop.canvas.panY
             ];
-            prop.input.isMouseDown = true;
+            this.input.isMouseDown = true;
 
             // Aircraft label selection
             let position = [event.pageX, -event.pageY];
@@ -274,7 +263,7 @@ export default class InputController {
 
             position[0] = parseFloat(position[0].toFixed(2));
             position[1] = parseFloat(position[1].toFixed(2));
-            prop.input.positions += `[${position.join(',')}]`;
+            this.input.positions += `[${position.join(',')}]`;
 
             return false;
         }
@@ -337,20 +326,20 @@ export default class InputController {
         const $strip = this.$element.find(SELECTORS.DOM_SELECTORS.STRIP);
         $strip.removeClass(SELECTORS.CLASSNAMES.ACTIVE);
 
-        prop.input.callsign = '';
-        prop.input.data = '';
+        this.input.callsign = '';
+        this.input.data = '';
 
-        if (prop.input.command.length === 0) {
+        if (this.input.command.length === 0) {
             return;
         }
 
-        let match = /^\s*(\w+)/.exec(prop.input.command);
+        let match = /^\s*(\w+)/.exec(this.input.command);
 
         if (!match) {
             return;
         }
 
-        prop.input.callsign = match[1];
+        this.input.callsign = match[1];
         let number = 0;
         // FIXME: this is a very mutable property. perhaps it should be something else?
         match = null;
@@ -359,7 +348,7 @@ export default class InputController {
         for (let i = 0; i < prop.aircraft.list.length; i++) {
             const aircraft = prop.aircraft.list[i];
 
-            if (aircraft.matchCallsign(prop.input.callsign)) {
+            if (aircraft.matchCallsign(this.input.callsign)) {
                 number += 1;
                 match = aircraft;
                 // TODO: this should be from an encapsulated class on the window.
@@ -387,7 +376,7 @@ export default class InputController {
     onCommandInputChangeHandler() {
         this.tab_completion_reset();
 
-        prop.input.command = this.$commandInput.val();
+        this.input.command = this.$commandInput.val();
 
         this.input_parse();
     }
@@ -421,15 +410,15 @@ export default class InputController {
                 this.input_parse();
 
                 if (this.input_run()) {
-                    prop.input.history.unshift(prop.input.callsign);
+                    this.input.history.unshift(this.input.callsign);
                     this.$commandInput.val('');
-                    prop.input.command = '';
+                    this.input.command = '';
 
                     this.tab_completion_reset();
                     this.input_parse();
                 }
 
-                prop.input.history_item = null;
+                this.input.history_item = null;
 
                 break;
 
@@ -533,7 +522,7 @@ export default class InputController {
                 break;
 
             case KEY_CODES.TAB:
-                if (!prop.input.tab_compl.matches) {
+                if (!this.input.tab_compl.matches) {
                     this.tab_completion_match();
                 }
 
@@ -558,14 +547,14 @@ export default class InputController {
      * @param opt
      */
     tab_completion_cycle(opt) {
-        const matches = prop.input.tab_compl.matches;
+        const matches = this.input.tab_compl.matches;
 
         if (!matches || matches.length === 0) {
             return;
         }
 
         // TODO: this block needs some work. this initial assignment looks to be overwritten every time.
-        let i = prop.input.tab_compl.cycle_item;
+        let i = this.input.tab_compl.cycle_item;
         if (opt.backwards) {
             i = (i <= 0) ? matches.length - 1 : i - 1;
         } else {
@@ -574,8 +563,8 @@ export default class InputController {
 
         this.$commandInput.val(`${matches[i]} `);
 
-        prop.input.command = matches[i];
-        prop.input.tab_compl.cycle_item = i;
+        this.input.command = matches[i];
+        this.input.tab_compl.cycle_item = i;
 
         this.input_parse();
     }
@@ -589,9 +578,9 @@ export default class InputController {
         const val = this.$commandInput.val();
         let aircrafts = prop.aircraft.list;
 
-        if (prop.input.callsign) {
+        if (this.input.callsign) {
             aircrafts = aircrafts.filter((a) => {
-                return a.matchCallsign(prop.input.callsign);
+                return a.matchCallsign(this.input.callsign);
             });
         }
 
@@ -599,20 +588,20 @@ export default class InputController {
             return aircraft.getCallsign();
         });
 
-        if (aircrafts.length === 1 && (prop.input.data || val[val.length - 1] === ' ')) {
+        if (aircrafts.length === 1 && (this.input.data || val[val.length - 1] === ' ')) {
             // TODO: update inline functions
             matches = aircrafts[0].COMMANDS.filter((c) => {
-                return c.toLowerCase().indexOf(prop.input.data.toLowerCase()) === 0;
+                return c.toLowerCase().indexOf(this.input.data.toLowerCase()) === 0;
             })
             .map((c) => {
-                return val.substring(0, prop.input.callsign.length + 1) + c;
+                return val.substring(0, this.input.callsign.length + 1) + c;
             });
         }
 
         this.tab_completion_reset();
 
-        prop.input.tab_compl.matches = matches;
-        prop.input.tab_compl.cycle_item = -1;
+        this.input.tab_compl.matches = matches;
+        this.input.tab_compl.cycle_item = -1;
     }
 
     /**
@@ -620,7 +609,7 @@ export default class InputController {
      * @method tab_completion_reset
      */
     tab_completion_reset() {
-        prop.input.tab_compl = {};
+        this.input.tab_compl = {};
     }
 
     /**
@@ -628,7 +617,7 @@ export default class InputController {
      * @method input_history_clamp
      */
     input_history_clamp() {
-        prop.input.history_item = clamp(0, prop.input.history_item, prop.input.history.length - 1);
+        this.input.history_item = clamp(0, this.input.history_item, this.input.history.length - 1);
     }
 
     /**
@@ -636,19 +625,19 @@ export default class InputController {
      * @method input_history_prev
      */
     input_history_prev() {
-        if (prop.input.history.length === 0) {
+        if (this.input.history.length === 0) {
             return;
         }
 
-        if (prop.input.history_item == null) {
-            prop.input.history.unshift(prop.input.command);
-            prop.input.history_item = 0;
+        if (this.input.history_item == null) {
+            this.input.history.unshift(this.input.command);
+            this.input.history_item = 0;
         }
 
-        prop.input.history_item += 1;
+        this.input.history_item += 1;
         this.input_history_clamp();
 
-        const command = `${prop.input.history[prop.input.history_item]} `;
+        const command = `${this.input.history[this.input.history_item]} `;
         this.$commandInput.val(command.toUpperCase());
 
         this.onCommandInputChangeHandler();
@@ -659,26 +648,26 @@ export default class InputController {
      * @method input_history_next
      */
     input_history_next() {
-        if (prop.input.history.length === 0 || !prop.input.history_item) {
+        if (this.input.history.length === 0 || !this.input.history_item) {
             return;
         }
 
-        prop.input.history_item -= 1;
+        this.input.history_item -= 1;
 
-        if (prop.input.history_item <= 0) {
-            this.$commandInput.val(prop.input.history[0]);
+        if (this.input.history_item <= 0) {
+            this.$commandInput.val(this.input.history[0]);
 
             this.onCommandInputChangeHandler();
 
-            prop.input.history.splice(0, 1);
-            prop.input.history_item = null;
+            this.input.history.splice(0, 1);
+            this.input.history_item = null;
 
             return;
         }
 
         this.input_history_clamp();
 
-        const command = `${prop.input.history[prop.input.history_item]} `;
+        const command = `${this.input.history[this.input.history_item]} `;
 
         this.$commandInput.val(command.toUpperCase());
         this.onCommandInputChangeHandler();
@@ -694,7 +683,7 @@ export default class InputController {
         // TODO: does this need to be in a try/catch?
         // TODO: abstract this to another method and only hanlde the return with this method.
         try {
-            result = zlsa.atc.Parser.parse(prop.input.command.trim().toLowerCase());
+            result = zlsa.atc.Parser.parse(this.input.command.trim().toLowerCase());
         } catch (error) {
             if (_get(error, 'name', '') === 'SyntaxError') {
                 window.uiController.ui_log('Command not understood');

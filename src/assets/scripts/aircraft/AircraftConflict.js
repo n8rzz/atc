@@ -134,7 +134,11 @@ export default class AircraftConflict {
         ) {
             this.collided = true;
             const isWarning = true;
-            window.uiController.ui_log(`${this.aircraft[0].getCallsign()} collided with ${this.aircraft[1].getCallsign()}`, isWarning);
+
+            window.uiController.ui_log(
+                `${this.aircraft[0].getCallsign()} collided with ${this.aircraft[1].getCallsign()}`,
+                isWarning
+            );
 
             prop.game.score.hit += 1;
             this.aircraft[0].hit = true;

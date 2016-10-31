@@ -24,6 +24,7 @@ const TUTORIAL_TEMPLATE = '' +
 export default class TutorialView {
     /**
      * @constructor
+     * @param $element {jquery|HTML Element|null}
      */
     constructor($element = null) {
         /**
@@ -69,11 +70,12 @@ export default class TutorialView {
          */
         this.$tutorialNext = null;
 
-        prop.tutorial = tutorial;
         this.tutorial = tutorial;
         this.tutorial.steps = [];
         this.tutorial.step = 0;
         this.tutorial.open = false;
+
+        prop.tutorial = tutorial;
 
         this._init()
             .layout()
@@ -112,7 +114,7 @@ export default class TutorialView {
             throw new Error('Expected $element to be defined. `body` tag does not exist in the DOM');
         }
 
-        prop.tutorial.html = this.$tutorialView;
+        this.tutorial.html = this.$tutorialView;
         this.$element.append(this.$tutorialView);
 
         return this;
@@ -172,10 +174,10 @@ export default class TutorialView {
      * @method tutorial_init_pre
      */
     tutorial_init_pre() {
-        prop.tutorial = {};
-        prop.tutorial.steps = [];
-        prop.tutorial.step = 0;
-        prop.tutorial.open = false;
+        this.tutorial = {};
+        this.tutorial.steps = [];
+        this.tutorial.step = 0;
+        this.tutorial.open = false;
 
         const tutorial_position = [0.1, 0.85];
 
@@ -527,7 +529,7 @@ export default class TutorialView {
      * @method tutorial_toggle
      */
     tutorial_toggle() {
-        if (prop.tutorial.open) {
+        if (this.tutorial.open) {
             this.tutorial_close();
         } else {
             this.tutorial_open();
@@ -540,10 +542,10 @@ export default class TutorialView {
      */
     tutorial_get(step = null) {
         if (!step) {
-            step = prop.tutorial.step;
+            step = this.tutorial.step;
         }
 
-        return prop.tutorial.steps[step];
+        return this.tutorial.steps[step];
     }
 
     /**
@@ -569,7 +571,7 @@ export default class TutorialView {
      * @method tutorial_step
      */
     tutorial_step(options) {
-        prop.tutorial.steps.push(new TutorialStep(options));
+        this.tutorial.steps.push(new TutorialStep(options));
     }
 
     /**
@@ -595,7 +597,7 @@ export default class TutorialView {
      * @method tutorial_open
      */
     tutorial_open() {
-        prop.tutorial.open = true;
+        this.tutorial.open = true;
 
         this.$tutorialView.addClass(SELECTORS.CLASSNAMES.OPEN);
         this.$tutorialToggle.addClass(SELECTORS.CLASSNAMES.ACTIVE);
@@ -608,7 +610,7 @@ export default class TutorialView {
      * @method tutorial_close
      */
     tutorial_close() {
-        prop.tutorial.open = false;
+        this.tutorial.open = false;
 
         this.$tutorialView.removeClass(SELECTORS.CLASSNAMES.OPEN);
         this.$tutorialToggle.removeClass(SELECTORS.CLASSNAMES.ACTIVE);
@@ -633,13 +635,13 @@ export default class TutorialView {
      * @method tutorial_next
      */
     tutorial_next() {
-        if (prop.tutorial.step === prop.tutorial.steps.length - 1) {
+        if (this.tutorial.step === this.tutorial.steps.length - 1) {
             this.tutorial_close();
 
             return;
         }
 
-        prop.tutorial.step = clamp(0, prop.tutorial.step + 1, prop.tutorial.steps.length - 1);
+        this.tutorial.step = clamp(0, this.tutorial.step + 1, this.tutorial.steps.length - 1);
 
         this.tutorial_update_content();
     }
@@ -648,7 +650,7 @@ export default class TutorialView {
      * @method tutorial_prev
      */
     tutorial_prev() {
-        prop.tutorial.step = clamp(0, prop.tutorial.step - 1, prop.tutorial.steps.length - 1);
+        this.tutorial.step = clamp(0, this.tutorial.step - 1, this.tutorial.steps.length - 1);
 
         this.tutorial_update_content();
     }

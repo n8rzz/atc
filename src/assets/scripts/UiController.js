@@ -170,28 +170,12 @@ export default class UiView {
         this.$toggleTerrain = null;
         this.$toggleOptions = null;
 
-        this.ui = {};
-        this.ui.scale_default = -1;
-        this.ui.scale_max = -1;
-        this.ui.scale_min = -1;
-        this.ui.scale = -1;
-        this.ui.terrain = {};
-
-
-        return this;
-    }
-
-    /**
-     * @for UiController
-     * @method ui_init_pre
-     */
-    ui_init_pre() {
-        prop.ui = ui;
-        prop.ui.scale_default = 8; // pixels per km
-        prop.ui.scale_max = 80; // max scale
-        prop.ui.scale_min = 1; // min scale
-        prop.ui.scale = prop.ui.scale_default;
-        prop.ui.terrain = {
+        this.ui = ui;
+        this.ui.scale_default = 8; // pixels per km
+        this.ui.scale_max = 80; // max scale
+        this.ui.scale_min = 1; // min scale
+        this.ui.scale = this.ui.scale_default;
+        this.ui.terrain = {
             colors: {
                 1000: '26, 150, 65',
                 2000: '119, 194, 92',
@@ -203,6 +187,34 @@ export default class UiView {
             border_opacity: 1,
             fill_opacity: 0.1
         };
+
+
+
+        return this;
+    }
+
+    /**
+     * @for UiController
+     * @method ui_init_pre
+     */
+    ui_init_pre() {
+        prop.ui = ui;
+        // prop.ui.scale_default = 8; // pixels per km
+        // prop.ui.scale_max = 80; // max scale
+        // prop.ui.scale_min = 1; // min scale
+        // prop.ui.scale = prop.ui.scale_default;
+        // prop.ui.terrain = {
+        //     colors: {
+        //         1000: '26, 150, 65',
+        //         2000: '119, 194, 92',
+        //         3000: '255, 255, 192',
+        //         4000: '253, 201, 128',
+        //         5000: '240, 124, 74',
+        //         6000: '156, 81, 31'
+        //     },
+        //     border_opacity: 1,
+        //     fill_opacity: 0.1
+        // };
 
         this.ui_set_scale_from_storage();
     }
@@ -386,7 +398,7 @@ export default class UiView {
      * @return {number}
      */
     px_to_km(pixels) {
-        return pixels / prop.ui.scale;
+        return pixels / this.ui.scale;
     }
 
     //TODO: this function should live in a helper file somewhere
@@ -397,7 +409,7 @@ export default class UiView {
      * @return {number}
      */
     km_to_px(kilometers) {
-        return kilometers * prop.ui.scale;
+        return kilometers * this.ui.scale;
     }
 
     /**
@@ -405,7 +417,7 @@ export default class UiView {
      * @method ui_after_zoom
      */
     ui_after_zoom() {
-        localStorage[STORAGE_KEY.ATC_SCALE] = prop.ui.scale;
+        localStorage[STORAGE_KEY.ATC_SCALE] = this.ui.scale;
 
         prop.canvas.dirty = true;
     }
@@ -420,10 +432,10 @@ export default class UiView {
             round(this.px_to_km(prop.canvas.panY))
         ];
 
-        prop.ui.scale *= 0.9;
+        this.ui.scale *= 0.9;
 
-        if (prop.ui.scale < prop.ui.scale_min) {
-            prop.ui.scale = prop.ui.scale_min;
+        if (this.ui.scale < this.ui.scale_min) {
+            this.ui.scale = this.ui.scale_min;
         }
 
         this.ui_after_zoom();
@@ -442,9 +454,9 @@ export default class UiView {
             round(this.px_to_km(prop.canvas.panY))
         ];
 
-        prop.ui.scale /= 0.9;
-        if (prop.ui.scale > prop.ui.scale_max) {
-            prop.ui.scale = prop.ui.scale_max;
+        this.ui.scale /= 0.9;
+        if (this.ui.scale > this.ui.scale_max) {
+            this.ui.scale = this.ui.scale_max;
         }
 
         this.ui_after_zoom();
@@ -458,7 +470,7 @@ export default class UiView {
      * @method ui_zoom_reset
      */
     ui_zoom_reset() {
-        prop.ui.scale = prop.ui.scale_default;
+        this.ui.scale = this.ui.scale_default;
 
         this.ui_after_zoom();
     }
@@ -596,6 +608,6 @@ export default class UiView {
             return;
         }
 
-        prop.ui.scale = localStorage[STORAGE_KEY.ATC_SCALE];
+        this.ui.scale = localStorage[STORAGE_KEY.ATC_SCALE];
     }
 }

@@ -61,7 +61,7 @@ export default class AircraftController {
      * @method aircraft_auto_toggle
      */
     aircraft_auto_toggle() {
-        prop.aircraft.auto.enabled = !this.aircraft.auto.enabled;
+        this.aircraft.auto.enabled = !this.aircraft.auto.enabled;
     }
 
     /**
