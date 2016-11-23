@@ -11,23 +11,27 @@ import { FIX_LIST_MOCK } from '../Fix/_mocks/fixMocks';
 const NAME_MOCK = '25R';
 const SEGMENT_WAYPOINTS_MOCK = ['RBELL', ['ROPPR', 'A70'], ['MDDOG', 'A90'], ['TARRK', 'A110']];
 
-ava.before(() => FixCollection.init(FIX_LIST_MOCK, airportPositionFixture));
-ava.after(() => FixCollection.destroy());
+let fixCollection;
+ava.before(() => {
+    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture)
+});
+
+ava.after(() => fixCollection.destroy());
 
 ava('throws with invalid parameters', t => {
-    t.notThrows(() => new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK));
+    t.notThrows(() => new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK, fixCollection));
 });
 
 ava('accepts name and segmentWaypoints as parameters', t => {
-    const result = new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK);
+    const result = new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK, fixCollection);
 
     t.true(result.name === NAME_MOCK);
     t.true(result.length === result._items.length);
     t.true(result._items.length === SEGMENT_WAYPOINTS_MOCK.length);
 });
 
-ava('accepts name as a single parameter', t => {
-    const result = new RouteSegmentModel(NAME_MOCK);
+ava('accepts name and fixCollection as parameters', t => {
+    const result = new RouteSegmentModel(NAME_MOCK, fixCollection);
 
     t.true(result.name === NAME_MOCK);
     t.true(result._items.length === 0);
@@ -43,18 +47,17 @@ ava('._init() does not call ._createWaypointModelsFromList() when it receives on
     t.false(spy.calledOnce);
 });
 
-ava('._init() calls ._createWaypointModelsFromList() when it receives both a `name` and a `segmentList`', t => {
+ava('._init() calls ._createWaypointModelsFromList() when it receives `name`, `segmentList` and `fixCollection`', t => {
     const model = new RouteSegmentModel();
     const spy = sinon.spy(model, '_createWaypointModelsFromList');
 
-    model._init(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK);
+    model._init(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK, fixCollection);
 
-    t.true(spy.calledOnce);
-    t.true(spy.withArgs(SEGMENT_WAYPOINTS_MOCK).calledOnce);
+    t.true(spy.withArgs(SEGMENT_WAYPOINTS_MOCK, fixCollection).calledOnce);
 });
 
 ava('._addWaypointToCollection() throws if it does not receive a `StandardRouteWaypointModel`', t => {
-    const model = new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK);
+    const model = new RouteSegmentModel(NAME_MOCK, SEGMENT_WAYPOINTS_MOCK, fixCollection);
 
     t.throws(() => model._addWaypointToCollection({}));
 });

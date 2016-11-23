@@ -64,11 +64,14 @@ export default class AirportModel {
         this.position = null;
         this.runways = [];
         this.runway = null;
-        this.fixes = {};
+
+        this.fixes = {}
+        this.fixCollection = null;
         this.sids = {};
         this.sidCollection = null;
         this.stars = {};
         this.starCollection = null;
+
         this.maps = {};
         this.airways = {};
         this.restricted_areas = [];
@@ -105,7 +108,7 @@ export default class AirportModel {
      * @return {array<FixModel>}
      */
     get real_fixes() {
-        return FixCollection.findRealFixes();
+        return this.fixCollection.findRealFixes();
     }
 
     /**
@@ -155,10 +158,10 @@ export default class AirportModel {
         this.rr_center = _get(data, 'rr_center');
 
         this.fixes = _get(data, 'fixes', {});
-        FixCollection.init(this.fixes, this.position);
+        this.fixCollection = new FixCollection(this.fixes, this.position);
 
-        this.sidCollection = new StandardRouteCollection(data.sids);
-        this.starCollection = new StandardRouteCollection(data.stars);
+        this.sidCollection = new StandardRouteCollection(data.sids, this.fixCollection);
+        this.starCollection = new StandardRouteCollection(data.stars, this.fixCollection);
 
         this.loadTerrain();
         this.buildAirportAirspace(data.airspace);
@@ -347,7 +350,7 @@ export default class AirportModel {
             if (!_has(arrivals[i], 'type')) {
                 log(`${this.icao} arrival stream #${i} not given type!`, LOG.WARNING);
             } else {
-                this.arrivals.push(arrivalFactory(this, arrivals[i]));
+                this.arrivals.push(arrivalFactory(this, arrivals[i], this.fixCollection));
             }
         }
     }
@@ -419,7 +422,8 @@ export default class AirportModel {
         // when the parse method is run, this method also runs. however, when an airport is being re-loaded,
         // only this method runs. this doesnt belong here but needs to be here so the fixes get populated correctly.
         // FIXME: make FixCollection a instance class ainstead of a static class
-        FixCollection.init(this.fixes, this.position);
+        console.log(this.fixCollection);
+        // FixCollection.init(this.fixes, this.position);
 
         this.updateRunway();
         this.addAircraft();
@@ -657,7 +661,7 @@ export default class AirportModel {
      * @return {array}
      */
     getFixPosition(fixName) {
-        const fixModel = FixCollection.findFixByName(fixName);
+        const fixModel = this.fixCollection.findFixByName(fixName);
 
         return fixModel.position;
     }

@@ -1,3 +1,4 @@
+/* eslint-disable arrow-parens, max-len, import/no-extraneous-dependencies*/
 import ava from 'ava';
 
 import FixCollection from '../../../src/assets/scripts/airport/Fix/FixCollection';
@@ -8,63 +9,70 @@ import {
     SMALL_FIX_LIST_MOCK
 } from './_mocks/fixMocks';
 
-
-ava.serial('FixCollection throws when an attempt to instantiate is made with invalid params', t => {
+ava('FixCollection throws when an attempt to instantiate is made with invalid params', t => {
     t.throws(() => new FixCollection());
+    t.throws(() => new FixCollection(FIX_LIST_MOCK, null));
+    t.throws(() => new FixCollection(null, airportPositionFixture));
 
-    t.true(FixCollection._items.length === 0);
-    t.true(FixCollection.length === 0);
+    t.notThrows(() => new FixCollection(FIX_LIST_MOCK, airportPositionFixture));
 });
 
-ava.serial('FixCollection sets its properties when it receives a valid fixList', t => {
-    FixCollection.init(FIX_LIST_MOCK, airportPositionFixture);
+ava('FixCollection sets its properties when it receives a valid fixList', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
 
-    t.true(FixCollection._items.length > 0);
-    t.true(FixCollection.length === FixCollection._items.length);
+    t.true(collection._items.length > 0);
+    t.true(collection.length === collection._items.length);
 });
 
-ava.serial('.addFixToCollection() throws if it doesnt receive a FixModel instance', t => {
-    t.throws(() => FixCollection.addFixToCollection({}));
+ava('.addFixToCollection() throws if it doesnt receive a FixModel instance', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+
+    t.throws(() => collection.addFixToCollection({}));
 });
 
-ava.serial('.findFixByName() returns a FixModel if it exists within the collection', t => {
-    const result = FixCollection.findFixByName('BAKRR');
+ava('.findFixByName() returns a FixModel if it exists within the collection', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.findFixByName('BAKRR');
 
     t.true(result.name === 'BAKRR');
     t.true(result instanceof FixModel);
 });
 
-ava.serial('.findFixByName() returns a FixMode if it exists within the collection and is passed as lowercase', t => {
-    const result = FixCollection.findFixByName('bakrr');
+ava('.findFixByName() returns a FixMode if it exists within the collection and is passed as lowercase', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.findFixByName('bakrr');
 
     t.true(result.name === 'BAKRR');
     t.true(result instanceof FixModel);
 });
 
-ava.serial('.findFixByName() returns a FixMode if it exists within the collection and is passed as mixed case', t => {
-    const result = FixCollection.findFixByName('bAkRr');
+ava('.findFixByName() returns a FixMode if it exists within the collection and is passed as mixed case', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.findFixByName('bAkRr');
 
     t.true(result.name === 'BAKRR');
     t.true(result instanceof FixModel);
 });
 
-ava.serial('.findFixByName() returns null if a FixModel does not exist within the collection', t => {
-    const result = FixCollection.findFixByName('');
+ava('.findFixByName() returns null if a FixModel does not exist within the collection', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.findFixByName('');
 
     t.true(result === null);
 });
 
-ava.serial('.findRealFixes() returns a list of fixes that dont have `_` prepedning thier name', t => {
-    const result = FixCollection.findRealFixes();
+ava('.findRealFixes() returns a list of fixes that dont have `_` prepedning thier name', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.findRealFixes();
 
     t.true(result.length === 104);
 });
 
-ava.serial('.init() resets _items when it is called with an existing collection', t => {
-    t.true(FixCollection.length === 105);
-
-    FixCollection.init(SMALL_FIX_LIST_MOCK);
-
-    t.false(FixCollection.length === 105);
-    t.true(FixCollection.length === 2);
-});
+// ava('.init() resets _items when it is called with an existing collection', t => {
+//     t.true(collection.length === 105);
+//
+//     collection.init(SMALL_FIX_LIST_MOCK);
+//
+//     t.false(collection.length === 105);
+//     t.true(collection.length === 2);
+// });

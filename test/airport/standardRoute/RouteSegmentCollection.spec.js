@@ -10,8 +10,12 @@ import { airportPositionFixture } from '../../fixtures/airportFixtures';
 import { FIX_LIST_MOCK } from '../Fix/_mocks/fixMocks';
 import { ROUTE_SEGMENTS_MOCK } from './_mocks/standardRouteMocks';
 
-ava.before(() => FixCollection.init(FIX_LIST_MOCK, airportPositionFixture));
-ava.after(() => FixCollection.destroy());
+let fixCollection;
+ava.before(() => {
+    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture)
+});
+
+ava.after(() => fixCollection.destroy());
 
 ava('throws with invalid parameters', t => {
     t.throws(() => new RouteSegmentCollection());
@@ -25,16 +29,16 @@ ava('throws with invalid parameters', t => {
 
 ava('accepts routeSegments as a parameter and sets its properties', t => {
     const expectedResultListLength = 8;
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
 
-    t.notThrows(() => new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK));
+    t.notThrows(() => new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection));
     t.true(collection.length === expectedResultListLength);
     t.true(collection._items.length === expectedResultListLength);
 });
 
 ava('.findSegmentByName() returns a SegmentModel of a segment within the collection', t => {
     const SEGMENT_NAME = '25L';
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
     const result = collection.findSegmentByName(SEGMENT_NAME);
 
     t.true(result.name === SEGMENT_NAME);
@@ -43,7 +47,7 @@ ava('.findSegmentByName() returns a SegmentModel of a segment within the collect
 
 ava('.findSegmentByName() returns undefined if a segment name cannot be found', t => {
     const SEGMENT_NAME = 'SUDZ';
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
     const result = collection.findSegmentByName(SEGMENT_NAME);
 
     t.notThrows(() => collection.findSegmentByName(SEGMENT_NAME));
@@ -52,7 +56,7 @@ ava('.findSegmentByName() returns undefined if a segment name cannot be found', 
 
 ava('.findWaypointsForSegmentName() returns an array of fixes for a given segment name', t => {
     const SEGMENT_NAME = '25L';
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
     const result = collection.findWaypointsForSegmentName(SEGMENT_NAME);
 
     t.true(result.length === ROUTE_SEGMENTS_MOCK[SEGMENT_NAME].length);
@@ -60,14 +64,14 @@ ava('.findWaypointsForSegmentName() returns an array of fixes for a given segmen
 });
 
 ava('.gatherFixNamesForCollection() returns a list of names for each RouteSegmentModel in the collection', t => {
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
     const result = collection.gatherFixNamesForCollection();
 
     t.true(result.length === 8);
 });
 
 ava('._addSegmentToCollection() throws if not passed a RouteSegmentModel', t => {
-    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK);
+    const collection = new RouteSegmentCollection(ROUTE_SEGMENTS_MOCK, fixCollection);
 
     t.throws(() => collection._addSegmentToCollection({}));
 });

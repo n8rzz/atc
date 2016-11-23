@@ -16,15 +16,16 @@ export default class StandardRouteCollection extends BaseCollection {
     /**
      * @constructor
      * @param standardRouteEnum {object}
+     * @param fixCollection {FixCollection}
      */
-    constructor(standardRouteEnum) {
+    constructor(standardRouteEnum, fixCollection) {
         super(standardRouteEnum);
 
         if (typeof standardRouteEnum === 'undefined') {
             return;
         }
 
-        return this._init(standardRouteEnum);
+        return this._init(standardRouteEnum, fixCollection);
     }
 
     /**
@@ -33,10 +34,11 @@ export default class StandardRouteCollection extends BaseCollection {
      * @for StandardRouteCollection
      * @method _init
      * @param standardRouteEnum {object}
+     * @param fixCollection {FixCollection}
      * @private
      */
-    _init(standardRouteEnum) {
-        this._addRouteListToCollection(standardRouteEnum);
+    _init(standardRouteEnum, fixCollection) {
+        this._addRouteListToCollection(standardRouteEnum, fixCollection);
 
         return this;
     }
@@ -160,11 +162,12 @@ export default class StandardRouteCollection extends BaseCollection {
      * @for StandardRouteCollection
      * @method _addRouteListToCollection
      * @param routeList {object}
+     * @param fixCollection {FixCollection}
      * @private
      */
-    _addRouteListToCollection(routeList) {
+    _addRouteListToCollection(routeList, fixCollection) {
         _forEach(routeList, (route) => {
-            const routeModel = new StandardRouteModel(route);
+            const routeModel = new StandardRouteModel(route, fixCollection);
 
             this._addSidToCollection(routeModel);
         });

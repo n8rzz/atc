@@ -10,9 +10,10 @@ import { LOG } from '../../constants/logLevel';
  * @function ArrivalFactory
  * @param airport {AirportModel}
  * @param options {obejct}
+ * @param fixCollection {FixCollection}
  * @return {constructor}
  */
-export const arrivalFactory = (airport, options) => {
+export const arrivalFactory = (airport, options, fixCollection) => {
     if (options.type === '') {
         log(`${airport.icao} arrival stream not given type!`, LOG.WARNING);
         return null;
@@ -20,7 +21,7 @@ export const arrivalFactory = (airport, options) => {
 
     switch (options.type) {
         case 'random':
-            return new ArrivalBase(airport, options);
+            return new ArrivalBase(airport, options, fixCollection);
         case 'cyclic':
             return new ArrivalCyclic(airport, options);
         case 'wave':

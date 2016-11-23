@@ -2,7 +2,6 @@ import _compact from 'lodash/compact';
 import _find from 'lodash/find';
 import _forEach from 'lodash/forEach';
 import _map from 'lodash/map';
-import _uniqueId from 'lodash/uniqueId';
 import modelSourceFactory from '../../base/ModelSource/ModelSourceFactory';
 import BaseCollection from '../../base/BaseCollection';
 import FixModel from './FixModel';
@@ -18,7 +17,23 @@ import FixModel from './FixModel';
  * @class FixCollection
  * @extends BaseCollection
  */
-class FixCollection extends BaseCollection {
+export default class FixCollection extends BaseCollection {
+    /**
+     * @constructor
+     * @for FixCollection
+     * @param fixList {object}
+     * @param airportPosition {PositionModel}
+     */
+    constructor(fixList, airportPosition) {
+        super();
+
+        if (!fixList || !airportPosition) {
+            throw new TypeError(`Invalid parameter. Expected both fixList and airportPosition to be defined`);
+        }
+
+        return this.init(fixList, airportPosition);
+    }
+
     /**
      * Lifecycle method. Should be run only once on instantiation.
      *
@@ -128,5 +143,3 @@ class FixCollection extends BaseCollection {
         });
     }
 }
-
-export default new FixCollection();

@@ -1,7 +1,7 @@
 ## 3.1.0 (November 20, 2016)
 ---
 ### Major
-
+- Converted `FixCollection` to an instance class and refactored it away from being a static class.  [#116](https://github.com/n8rzz/atc/issues/116)
 
 ### Minor
 - Implements `modelSourceFactory` and `modelSourcePool` [#77](https://github.com/n8rzz/atc/issues/77)
