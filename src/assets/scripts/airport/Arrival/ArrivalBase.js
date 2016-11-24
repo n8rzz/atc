@@ -16,7 +16,7 @@ import {
     calculateDistanceToBoundary,
     calculateHeadingFromTwoPositions
 } from '../../math/flightMath';
-import { FLIGHT_CATEGORY } from '../../aircraft/AircraftInstanceModel';
+import { FLIGHT_CATEGORY } from '../../constants/aircraftConstants';
 import { AIRPORT_CONSTANTS } from '../../constants/airportConstants';
 import { TIME } from '../../constants/globalConstants';
 import { LOG } from '../../constants/logLevel';

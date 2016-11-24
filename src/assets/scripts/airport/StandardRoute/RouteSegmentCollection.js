@@ -33,6 +33,7 @@ export default class RouteSegmentCollection extends BaseCollection {
      * @param routeSegments {object}
      * @param fixCollection {FixCollection}
      */
+    /* istanbul ignore next */
     constructor(routeSegments, fixCollection) {
         super(routeSegments);
 

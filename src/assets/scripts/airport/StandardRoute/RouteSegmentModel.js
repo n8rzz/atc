@@ -19,6 +19,7 @@ export default class RouteSegmentModel extends BaseModel {
      * @param segmentWaypoints {array}  a mixed array of strings or arrays of strings
      * @param fixCollection {FixCollection}
      */
+    /* istanbul ignore next */
     constructor(name, segmentWaypoints = [], fixCollection) {
         super();
 

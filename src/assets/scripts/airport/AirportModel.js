@@ -64,6 +64,7 @@ export default class AirportModel {
         this.level = null;
         this.position = null;
         this.runways = [];
+        // TODO: rename to `runwayName`
         this.runway = null;
 
         this.fixes = {}
@@ -679,6 +680,20 @@ export default class AirportModel {
     }
 
     /**
+     *
+     * @for AirportModel
+     * @method findWaypointModelsForSid
+     * @param id {string}
+     * @param entry {string}
+     * @param runway {string}
+     * @param isPreSpawn {boolean} flag used to determine if distances between waypoints should be calculated
+     * @return {array<StandardWaypointModel>}
+     */
+    findWaypointModelsForSid(id, entry, runway, isPreSpawn = false) {
+        return this.sidCollection.findFixModelsForRouteByEntryAndExit(id, entry, runway, isPreSpawn);
+    }
+
+    /**
      * @for AirportModel
      * @method getSIDExitPoint
      * @param icao {string}  Name of SID
@@ -710,6 +725,7 @@ export default class AirportModel {
     /**
      *
      * @for AirportModel
+     * @method findWaypointModelsForStar
      * @param id {string}
      * @param entry {string}
      * @param runway {string}

@@ -1,14 +1,24 @@
-## 3.1.0 (November 20, 2016)
+## 3.2.0 (December 20, 2016)
 ---
 ### Major
 - Converted `FixCollection` to an instance class and refactored it away from being a static class.  [#116](https://github.com/n8rzz/atc/issues/116)
+* Integrates `sidCollection` and `starCollection` with `RouteModel` within `AircraftInstanceModel` [#53](https://github.com/n8rzz/atc/issues/53)
+    - Creates getters for `currentLeg` and `currentWaypoint`
+    - Abstracts restrictions logic to live within `Waypoint`
+    - Consolidates `runSID()` and `climbViaSid()` logic
+
+
 
 ### Minor
 - Implements `modelSourceFactory` and `modelSourcePool` [#77](https://github.com/n8rzz/atc/issues/77)
 - Refactors `canvasController.canvas_draw_sids` method to use `airport.sidCollection` instead of `airport.sid` [#144](https://github.com/n8rzz/atc/issues/144)
+- Moves creation of Legs and Waypoints to constants instead of as method arguments [#135](https://github.com/n8rzz/atc/issues/135)
+
 
 
 ### Bugfixes
+- Moves `_comment` blocks in airport json file to be within object the are describing [#145](https://github.com/n8rzz/atc/issues/145)
+
 
 
 

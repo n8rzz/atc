@@ -1,5 +1,6 @@
 /* eslint-disable arrow-parens, max-len, import/no-extraneous-dependencies*/
 import ava from 'ava';
+import _isEqual from 'lodash/isEqual';
 
 import FixCollection from '../../../src/assets/scripts/airport/Fix/FixCollection';
 import FixModel from '../../../src/assets/scripts/airport/Fix/FixModel';
@@ -68,11 +69,17 @@ ava('.findRealFixes() returns a list of fixes that dont have `_` prepedning thie
     t.true(result.length === 104);
 });
 
-// ava('.init() resets _items when it is called with an existing collection', t => {
-//     t.true(collection.length === 105);
-//
-//     collection.init(SMALL_FIX_LIST_MOCK);
-//
-//     t.false(collection.length === 105);
-//     t.true(collection.length === 2);
-// });
+ava('.getFixPositionCoordinates() returns the position of a FixModel', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.getFixPositionCoordinates('BAKRR');
+    const expectedResult = [ 675.477318026648, -12.012221291734532 ];
+
+    t.true(_isEqual(result, expectedResult));
+});
+
+ava('.getFixPositionCoordinates() returns null if a FixModel does not exist within the collection', t => {
+    const collection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
+    const result = collection.getFixPositionCoordinates('');
+
+    t.true(result === null);
+});

@@ -21,7 +21,7 @@ const RUNWAY_NAME_MOCK = '19R';
 
 let fixCollection;
 ava.before(() => {
-    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture)
+    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture);
 });
 
 ava.after(() => fixCollection.destroy());

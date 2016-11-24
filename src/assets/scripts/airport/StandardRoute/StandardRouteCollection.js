@@ -20,6 +20,7 @@ export default class StandardRouteCollection extends BaseCollection {
      * @param standardRouteEnum {object}
      * @param fixCollection {FixCollection}
      */
+    /* istanbul ignore next */
     constructor(standardRouteEnum, fixCollection) {
         super(standardRouteEnum);
 
