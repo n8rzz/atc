@@ -1,6 +1,5 @@
 import _isNil from 'lodash/isNil';
 import BaseModel from '../../base/BaseModel';
-import FixCollection from '../Fix/FixCollection';
 import Waypoint from '../../aircraft/Waypoint';
 
 /**
@@ -55,13 +54,16 @@ export default class StandardRouteWaypointModel extends BaseModel {
      *
      * @constructor
      * @param routeWaypoint {array|string}
+     * @param fixCollection {FixCollection}
      */
-    constructor(routeWaypoint) {
+    constructor(routeWaypoint, fixCollection) {
         super(routeWaypoint);
 
         if (typeof routeWaypoint === 'undefined') {
             return this;
         }
+
+        this._fixCollection = fixCollection;
 
         /**
          * Name of the fix
@@ -214,6 +216,7 @@ export default class StandardRouteWaypointModel extends BaseModel {
      * @for StandardRouteWaypointModel
      * @method _init
      * @param routeWaypoint {array|string}
+     * @param fixCollection {FixCollection}
      * @chainable
      * @private
      */
@@ -241,6 +244,7 @@ export default class StandardRouteWaypointModel extends BaseModel {
      * @method reset
      */
     reset() {
+        this._fixCollection = null;
         this.name = '';
         this._restrictions = null;
         this._altitude = null;
@@ -259,7 +263,7 @@ export default class StandardRouteWaypointModel extends BaseModel {
      * @private
      */
     clonePoisitonFromFix() {
-        const fixModel = FixCollection.findFixByName(this.name);
+        const fixModel = this._fixCollection.findFixByName(this.name);
 
         if (!fixModel) {
             console.warn(`The following fix was not found in the list of fixes for this Airport: ${this.name}`);
@@ -287,7 +291,7 @@ export default class StandardRouteWaypointModel extends BaseModel {
             }
         };
 
-        return new Waypoint(fmsWaypoint, airport);
+        return new Waypoint(fmsWaypoint, airport, this._fixCollection);
     }
 
     /**

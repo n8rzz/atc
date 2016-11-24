@@ -29,8 +29,12 @@ const RUNWAY_NAME_MOCK = '25L';
 const EXIT_FIXNAME_MOCK = 'KENNO';
 const ENTRY_FIXNAME_MOCK = 'DRK';
 
-ava.before(() => FixCollection.init(FIX_LIST_MOCK, airportPositionFixture));
-ava.after(() => FixCollection.destroy());
+let fixCollection;
+ava.before(() => {
+    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture)
+});
+
+ava.after(() => fixCollection.destroy());
 
 ava('throws when instantiated with invaild parameters', t => {
     t.throws(() => new StandardRouteModel());
@@ -41,12 +45,13 @@ ava('throws when instantiated with invaild parameters', t => {
 });
 
 ava('does not throw when instantiated with vaild parameters', t => {
-    const result = new StandardRouteModel(SID_MOCK);
+    const result = new StandardRouteModel(SID_MOCK, fixCollection);
 
-    t.notThrows(() => new StandardRouteModel(STAR_MOCK));
-    t.notThrows(() => new StandardRouteModel(SID_MOCK));
-    t.notThrows(() => new StandardRouteModel(SID_WITHOUT_BODY_MOCK));
-    t.notThrows(() => new StandardRouteModel(STAR_WITHOUT_RWY));
+    t.notThrows(() => new StandardRouteModel(STAR_MOCK, fixCollection));
+    t.notThrows(() => new StandardRouteModel(SID_MOCK, fixCollection));
+    t.notThrows(() => new StandardRouteModel(SID_WITHOUT_BODY_MOCK, fixCollection));
+    t.notThrows(() => new StandardRouteModel(STAR_WITHOUT_RWY, fixCollection));
+
     t.true(result.name === SID_MOCK.name);
     t.true(result.icao === SID_MOCK.icao);
     t.true(result._entryCollection instanceof RouteSegmentCollection);
@@ -66,7 +71,7 @@ ava('.findFixesAndRestrictionsForRunwayAndExit() returns an array of fixes for a
         ['KENNO', null]
     ];
     const expectedArguments = [RUNWAY_NAME_MOCK, EXIT_FIXNAME_MOCK];
-    const model = new StandardRouteModel(SID_MOCK);
+    const model = new StandardRouteModel(SID_MOCK, fixCollection);
     const spy = sinon.spy(model, '_findFixListForSidByRunwayAndExit');
 
     const result = model.findFixesAndRestrictionsForRunwayAndExit(RUNWAY_NAME_MOCK, EXIT_FIXNAME_MOCK);
@@ -79,7 +84,7 @@ ava('.findFixesAndRestrictionsForRunwayAndExit() returns an array of fixes for a
 ava('.findFixesAndRestrictionsForRunwayAndExit() returns body segment fixes when no runwayName or exitFixName is passed', t => {
     const expectedResult = [['SHEAD', 'A140+']];
     const expectedArguments = ['', ''];
-    const model = new StandardRouteModel(SID_MOCK);
+    const model = new StandardRouteModel(SID_MOCK, fixCollection);
     const spy = sinon.spy(model, '_findFixListForSidByRunwayAndExit');
 
     const result = model.findFixesAndRestrictionsForRunwayAndExit('', '');
@@ -97,7 +102,7 @@ ava('.findFixesAndRestrictionsForRunwayAndExit() returns body and exitPoint segm
         ['KENNO', null]
     ];
     const expectedArguments = ['', EXIT_FIXNAME_MOCK];
-    const model = new StandardRouteModel(SID_MOCK);
+    const model = new StandardRouteModel(SID_MOCK, fixCollection);
     const spy = sinon.spy(model, '_findFixListForSidByRunwayAndExit');
 
     const result = model.findFixesAndRestrictionsForRunwayAndExit('', EXIT_FIXNAME_MOCK);
@@ -116,7 +121,7 @@ ava('.findFixesAndRestrictionsForRunwayAndExit() returns rwy and exitPoint fixes
         ['WILLW', 'A140+'],
         ['MLF', null]
     ];
-    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK);
+    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK, fixCollection);
     const result = model.findFixesAndRestrictionsForRunwayAndExit(RUNWAY_NAME_MOCK, 'MLF');
 
     t.true(_isEqual(result, expectedResult));
@@ -133,7 +138,7 @@ ava('.findFixesAndRestrictionsForEntryAndRunway() returns fixes for a given arri
         ['PRINO', 'A80']
     ];
     const expectedArguments = [ENTRY_FIXNAME_MOCK, RUNWAY_NAME_MOCK];
-    const model = new StandardRouteModel(STAR_MOCK);
+    const model = new StandardRouteModel(STAR_MOCK, fixCollection);
     const spy = sinon.spy(model, '_findFixListForStarByEntryAndRunway');
 
     const result = model.findFixesAndRestrictionsForEntryAndRunway(ENTRY_FIXNAME_MOCK, RUNWAY_NAME_MOCK);
@@ -145,7 +150,7 @@ ava('.findFixesAndRestrictionsForEntryAndRunway() returns fixes for a given arri
 
 ava('.findStandardWaypointModelsForEntryAndExit() returns a list of `StandardRouteWaypointModel`s for a given STAR', t => {
     const expectedArguments = ['MLF', '19R'];
-    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1);
+    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1, fixCollection);
     const spy = sinon.spy(model, '_findStandardWaypointModelsForRoute');
 
     const result = model.findStandardWaypointModelsForEntryAndExit('MLF', '19R');
@@ -158,7 +163,7 @@ ava('.findStandardWaypointModelsForEntryAndExit() returns a list of `StandardRou
 });
 
 ava('.findStandardWaypointModelsForEntryAndExit() does call ._updateWaypointsWithPreviousWaypointData() if isPreSpawn is true', t => {
-    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1);
+    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1, fixCollection);
     const spy = sinon.spy(model, '_updateWaypointsWithPreviousWaypointData');
     const isPreSpawn = true;
 
@@ -168,7 +173,7 @@ ava('.findStandardWaypointModelsForEntryAndExit() does call ._updateWaypointsWit
 });
 
 ava('.findStandardWaypointModelsForEntryAndExit() does not call ._updateWaypointsWithPreviousWaypointData() if isPreSpawn is false', t => {
-    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1);
+    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1, fixCollection);
     const spy = sinon.spy(model, '_updateWaypointsWithPreviousWaypointData');
     const isPreSpawn = false;
 
@@ -179,7 +184,7 @@ ava('.findStandardWaypointModelsForEntryAndExit() does not call ._updateWaypoint
 
 ava('.calculateDistanceBetweenWaypoints() calculates the distance between two `StandardRouteWaypointModel` positions', t => {
     const expectedResult = 118.63498218153836;
-    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1);
+    const model = new StandardRouteModel(STAR_LIST_MOCK.GRNPA1, fixCollection);
     const waypointList = model.findStandardWaypointModelsForEntryAndExit('MLF', '19R');
     const result = model.calculateDistanceBetweenWaypoints(waypointList[0].position, waypointList[1].position);
 
@@ -188,14 +193,14 @@ ava('.calculateDistanceBetweenWaypoints() calculates the distance between two `S
 
 ava('.gatherExitPointNames() retuns a list of the exitPoint fix names', t => {
     const expectedResult = ['KENNO', 'OAL'];
-    const model = new StandardRouteModel(SID_MOCK);
+    const model = new StandardRouteModel(SID_MOCK, fixCollection);
     const result = model.gatherExitPointNames();
 
     t.true(_isEqual(result, expectedResult));
 });
 
 ava('.gatherExitPointNames() retuns an empty array if not exitPoints exist or the collection is undefined', t => {
-    const model = new StandardRouteModel(SID_WITHOUT_EXIT_MOCK.TRALR6);
+    const model = new StandardRouteModel(SID_WITHOUT_EXIT_MOCK.TRALR6, fixCollection);
     const result = model.gatherExitPointNames();
 
     t.true(_isArray(result));
@@ -205,22 +210,22 @@ ava('.gatherExitPointNames() retuns an empty array if not exitPoints exist or th
 ava('.hasExitPoints() returns a boolean', t => {
     let model;
 
-    model = new StandardRouteModel(SID_MOCK);
+    model = new StandardRouteModel(SID_MOCK, fixCollection);
     t.true(model.hasExitPoints());
 
-    model = new StandardRouteModel(SID_WITHOUT_EXIT_MOCK.TRALR6);
+    model = new StandardRouteModel(SID_WITHOUT_EXIT_MOCK.TRALR6, fixCollection);
     t.false(model.hasExitPoints());
 });
 
 ava('._buildSegmentCollection() returns null if segment is undefined', t => {
-    const model = new StandardRouteModel(STAR_MOCK);
+    const model = new StandardRouteModel(STAR_MOCK, fixCollection);
     const result = model._buildSegmentCollection();
 
     t.true(result === null);
 });
 
 ava('._buildSegmentCollection() returns null if segment is an empty object', t => {
-    const model = new StandardRouteModel(STAR_MOCK);
+    const model = new StandardRouteModel(STAR_MOCK, fixCollection);
     const result = model._buildSegmentCollection({});
 
     t.true(result === null);
@@ -245,7 +250,7 @@ ava('._buildEntryAndExitCollections() maps rwy fixes to _entryCollection when ex
 });
 
 ava('._findBodyFixList() returns an empty array when ._bodySegmentModel is undefined', t => {
-    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK);
+    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK, fixCollection);
 
     t.notThrows(() => model._findBodyFixList());
 
@@ -256,21 +261,21 @@ ava('._findBodyFixList() returns an empty array when ._bodySegmentModel is undef
 });
 
 ava('._findStandardWaypointModelsForRoute() returns a list of StandardRouteWaypointModels when _entryCollection and _exitCollection exist', t => {
-    const model = new StandardRouteModel(STAR_MOCK);
+    const model = new StandardRouteModel(STAR_MOCK, fixCollection);
     const result = model._findStandardWaypointModelsForRoute(ENTRY_FIXNAME_MOCK, RUNWAY_NAME_MOCK);
 
     t.true(result.length === 7);
 });
 
 ava('._findStandardWaypointModelsForRoute() returns a list of StandardRouteWaypointModels when _bodySegmentModel does not exist', t => {
-    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK);
+    const model = new StandardRouteModel(SID_WITHOUT_BODY_MOCK, fixCollection);
     const result = model._findStandardWaypointModelsForRoute(RUNWAY_NAME_MOCK, 'MLF');
 
     t.true(result.length === 6);
 });
 
 ava('._findStandardWaypointModelsForRoute() returns a list of StandardRouteWaypointModels when _exitCollection does not exist', t => {
-    const model = new StandardRouteModel(STAR_WITHOUT_RWY);
+    const model = new StandardRouteModel(STAR_WITHOUT_RWY, fixCollection);
     const result = model._findStandardWaypointModelsForRoute('BETHL', '');
 
     t.true(result.length === 9);
@@ -282,7 +287,7 @@ ava('._findFixListInByCollectionAndSegmentName() returns an array of normalized 
         ['IGM', 'A240'],
         ['ZATES', 'A190']
     ];
-    const model = new StandardRouteModel(STAR_MOCK);
+    const model = new StandardRouteModel(STAR_MOCK, fixCollection);
 
     t.notThrows(() => model._findFixListInByCollectionAndSegmentName('entryPoints', '_entryCollection', ENTRY_FIXNAME_MOCK));
 
@@ -297,7 +302,7 @@ ava('._findFixListInByCollectionAndSegmentName() returns an array of normalized 
         ['BIKKR', 'A210+'],
         ['KENNO', null]
     ];
-    const model = new StandardRouteModel(SID_MOCK);
+    const model = new StandardRouteModel(SID_MOCK, fixCollection);
 
     t.notThrows(() => model._findFixListInByCollectionAndSegmentName('rwy', '_exitCollection', EXIT_FIXNAME_MOCK));
 

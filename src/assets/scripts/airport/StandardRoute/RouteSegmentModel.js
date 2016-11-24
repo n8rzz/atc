@@ -17,9 +17,10 @@ export default class RouteSegmentModel extends BaseModel {
      * @constructor
      * @param name {string}  Icao of particular waypoint
      * @param segmentWaypoints {array}  a mixed array of strings or arrays of strings
+     * @param fixCollection {FixCollection}
      */
     /* istanbul ignore next */
-    constructor(name, segmentWaypoints = []) {
+    constructor(name, segmentWaypoints = [], fixCollection) {
         super();
 
         /**
@@ -42,7 +43,7 @@ export default class RouteSegmentModel extends BaseModel {
          */
         this._items = [];
 
-        return this._init(name, segmentWaypoints);
+        return this._init(name, segmentWaypoints, fixCollection);
     }
 
     /**
@@ -72,13 +73,14 @@ export default class RouteSegmentModel extends BaseModel {
      * @method _init
      * @param name {string}
      * @param segmentWaypoints {array}
+     * @param fixCollection {FixCollection}
      * @private
      */
-    _init(name, segmentWaypoints) {
+    _init(name, segmentWaypoints, fixCollection) {
         this.name = name;
 
         if (_isArray(segmentWaypoints)) {
-            this._createWaypointModelsFromList(segmentWaypoints);
+            this._createWaypointModelsFromList(segmentWaypoints, fixCollection);
         }
 
         return this;
@@ -118,11 +120,12 @@ export default class RouteSegmentModel extends BaseModel {
      * @for RouteSegmentModel
      * @method _createWaypointModelsFromList
      * @param segmentWaypoints {array}
+     * @param fixCollection {FixCollection}
      * @return waypointModelList {array}
      */
-    _createWaypointModelsFromList(segmentWaypoints) {
+    _createWaypointModelsFromList(segmentWaypoints, fixCollection) {
         _forEach(segmentWaypoints, (fixAndRestrictions) => {
-            const waypointModel = new StandardRouteWaypointModel(fixAndRestrictions);
+            const waypointModel = new StandardRouteWaypointModel(fixAndRestrictions, fixCollection);
 
             // TODO: calculate distance here
 
@@ -140,6 +143,7 @@ export default class RouteSegmentModel extends BaseModel {
      */
     _addWaypointToCollection(waypoint) {
         if (!(waypoint instanceof StandardRouteWaypointModel)) {
+            // eslint-disable-next-line max-len
             throw new TypeError(`Expected waypoint to be an instance of StandardRouteWaypointModel, instead received ${waypoint}.`);
         }
 

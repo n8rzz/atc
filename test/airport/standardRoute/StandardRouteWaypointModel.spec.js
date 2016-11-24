@@ -16,8 +16,12 @@ const NAME_MOCK = 'BIKKR';
 const RESTRICTIONS_MOCK = 'A80+|S250';
 const ROUTE_WAYPOINT_MOCK = [NAME_MOCK, RESTRICTIONS_MOCK];
 
-ava.before(() => FixCollection.init(FIX_LIST_MOCK, airportPositionFixture));
-ava.after(() => FixCollection.destroy());
+let fixCollection;
+ava.before(() => {
+    fixCollection = new FixCollection(FIX_LIST_MOCK, airportPositionFixture)
+});
+
+ava.after(() => fixCollection.destroy());
 
 ava('StandardRouteWaypointModel exits early when instantiated without parameters', t => {
     t.notThrows(() => new StandardRouteWaypointModel());
@@ -28,7 +32,7 @@ ava('StandardRouteWaypointModel exits early when instantiated without parameters
 });
 
 ava('sets only `name` when provided a string', t => {
-    const model = new StandardRouteWaypointModel(NAME_MOCK);
+    const model = new StandardRouteWaypointModel(NAME_MOCK, fixCollection);
 
     t.true(typeof model._id === 'string');
     t.true(model.name === NAME_MOCK);
@@ -38,13 +42,13 @@ ava('sets only `name` when provided a string', t => {
 });
 
 ava('.clonePoisitonFromFix() does not throw when no fix exists', t => {
-    const model = new StandardRouteWaypointModel('ABCD');
+    const model = new StandardRouteWaypointModel('ABCD', fixCollection);
 
     t.notThrows(() => model.clonePoisitonFromFix());
 });
 
 ava('does not call ._parseWaypointRestrictions() when provided a string', t => {
-    const model = new StandardRouteWaypointModel(NAME_MOCK);
+    const model = new StandardRouteWaypointModel(NAME_MOCK, fixCollection);
     const spy = sinon.spy(model, '_parseWaypointRestrictions');
 
     model._init(NAME_MOCK);
@@ -53,7 +57,7 @@ ava('does not call ._parseWaypointRestrictions() when provided a string', t => {
 });
 
 ava('calls ._parseWaypointRestrictions() when provided and array', t => {
-    const model = new StandardRouteWaypointModel(ROUTE_WAYPOINT_MOCK);
+    const model = new StandardRouteWaypointModel(ROUTE_WAYPOINT_MOCK, fixCollection);
     const spy = sinon.spy(model, '_parseWaypointRestrictions');
 
     model._init(ROUTE_WAYPOINT_MOCK);

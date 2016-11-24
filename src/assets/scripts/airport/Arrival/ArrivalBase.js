@@ -1,7 +1,6 @@
 import _get from 'lodash/get';
 import _map from 'lodash/map';
 import _random from 'lodash/random';
-import FixCollection from '../Fix/FixCollection';
 import RouteModel from '../Route/RouteModel';
 import PositionModel from '../../base/PositionModel';
 import {
@@ -29,23 +28,6 @@ import { LOG } from '../../constants/logLevel';
  */
 const INTERVAL_DELAY_IN_MS = TIME.ONE_HOUR_IN_SECONDS;
 
-// TODO: this shouldn't live here. perhaps move to `FixCollection` as an exported function?
-/**
- * Encapsulation of a `FixCollection` method.
- *
- * This allows for centralization of this logic, while avoiding the need for
- * another class method.
- *
- * @method getFixPostiion
- * @param fixName {string}
- * @return fix.position {array}
- */
-const getFixPosition = (fixName) => {
-    const fix = FixCollection.findFixByName(fixName);
-
-    return fix.position;
-};
-
 /**
  * Generate arrivals at random, averaging the specified arrival rate
  *
@@ -57,8 +39,9 @@ export default class ArrivalBase {
      * @constructor
      * @param airport {AirportInstanceModel}
      * @param options {object}
+     * @param fixCollection {FixCollection}
      */
-    constructor(airport, options) {
+    constructor(airport, options, fixCollection) {
         // FIXME: this creates a circular reference and should be refactored
         /**
          * Airport that arrivals belong to
@@ -438,8 +421,8 @@ export default class ArrivalBase {
         // spawn at first fix
         if (this.fixes.length > 1) {
             // calculate heading to next fix
-            position = getFixPosition(this.fixes[0].fix);
-            const nextPosition = getFixPosition(this.fixes[1].fix);
+            position = this._fixCollection.getFixPosition(this.fixes[0].fix);
+            const nextPosition = this._fixCollection.getFixPosition(this.fixes[1].fix);
             heading = calculateHeadingFromTwoPositions(nextPosition, position);
         } else if (this.activeRouteModel) {
             const isPreSpawn = false;

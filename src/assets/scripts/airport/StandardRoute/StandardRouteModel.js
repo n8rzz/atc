@@ -53,9 +53,10 @@ export default class StandardRouteModel extends BaseModel {
      *
      * @constructor
      * @param standardRoute {object}
+     * @param fixCollection {FixCollection}
      */
     /* istanbul ignore next */
-    constructor(standardRoute) {
+    constructor(standardRoute, fixCollection) {
         super();
 
         if (!_isObject(standardRoute) || _isArray(standardRoute)) {
@@ -155,7 +156,7 @@ export default class StandardRouteModel extends BaseModel {
          */
         this._entryCollection = null;
 
-        return this._init(standardRoute);
+        return this._init(standardRoute, fixCollection);
     }
 
     /**
@@ -164,9 +165,10 @@ export default class StandardRouteModel extends BaseModel {
      * @for StandardRouteModel
      * @method _init
      * @param standardRoute {object}
+     * @param fixCollection {FixCollection}
      * @private
      */
-    _init(standardRoute) {
+    _init(standardRoute, fixCollection) {
         this.icao = standardRoute.icao;
         this.name = standardRoute.name;
         this.draw = standardRoute.draw;
@@ -174,9 +176,9 @@ export default class StandardRouteModel extends BaseModel {
         this.body = standardRoute.body;
         this.exitPoints = _get(standardRoute, 'exitPoints', {});
         this.entryPoints = _get(standardRoute, 'entryPoints', {});
-        this._bodySegmentModel = this._buildSegmentModel(standardRoute.body);
+        this._bodySegmentModel = this._buildSegmentModel(standardRoute.body, fixCollection);
 
-        this._buildEntryAndExitCollections(standardRoute);
+        this._buildEntryAndExitCollections(standardRoute, fixCollection);
     }
 
     /**
@@ -299,11 +301,12 @@ export default class StandardRouteModel extends BaseModel {
      * @for StandardRouteModel
      * @method _buildSegmentModel
      * @param segmentFixList {array}
+     * @param fixCollection {FixCollection}
      * @return segmentModel {SegmentModel}
      * @private
      */
-    _buildSegmentModel(segmentFixList) {
-        const segmentModel = new RouteSegmentModel('body', segmentFixList);
+    _buildSegmentModel(segmentFixList, fixCollection) {
+        const segmentModel = new RouteSegmentModel('body', segmentFixList, fixCollection);
 
         return segmentModel;
     }
@@ -314,15 +317,16 @@ export default class StandardRouteModel extends BaseModel {
      * @for StandardRouteModel
      * @method _buildSegmentCollection
      * @param segment {object}
+     * @param fixCollection {FixCollection}
      * @return segmentCollection {SegmentCollection}
      * @private
      */
-    _buildSegmentCollection(segment) {
+    _buildSegmentCollection(segment, fixCollection) {
         if (typeof segment === 'undefined' || _isEmpty(segment)) {
             return null;
         }
 
-        const segmentCollection = new RouteSegmentCollection(segment);
+        const segmentCollection = new RouteSegmentCollection(segment, fixCollection);
 
         return segmentCollection;
     }
@@ -339,13 +343,13 @@ export default class StandardRouteModel extends BaseModel {
      * @param standardRoute
      * @private
      */
-    _buildEntryAndExitCollections(standardRoute) {
+    _buildEntryAndExitCollections(standardRoute, fixCollection) {
         if (_has(standardRoute, 'entryPoints')) {
-            this._entryCollection = this._buildSegmentCollection(standardRoute.entryPoints);
-            this._exitCollection = this._buildSegmentCollection(standardRoute.rwy);
+            this._entryCollection = this._buildSegmentCollection(standardRoute.entryPoints, fixCollection);
+            this._exitCollection = this._buildSegmentCollection(standardRoute.rwy, fixCollection);
         } else if (_has(standardRoute, 'exitPoints')) {
-            this._entryCollection = this._buildSegmentCollection(standardRoute.rwy);
-            this._exitCollection = this._buildSegmentCollection(standardRoute.exitPoints);
+            this._entryCollection = this._buildSegmentCollection(standardRoute.rwy, fixCollection);
+            this._exitCollection = this._buildSegmentCollection(standardRoute.exitPoints, fixCollection);
         }
     }
 

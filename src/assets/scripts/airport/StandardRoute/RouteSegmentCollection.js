@@ -31,10 +31,11 @@ export default class RouteSegmentCollection extends BaseCollection {
     /**
      * @constructor
      * @param routeSegments {object}
+     * @param fixCollection {FixCollection}
      */
     /* istanbul ignore next */
-    constructor(routeSegments) {
-        super();
+    constructor(routeSegments, fixCollection) {
+        super(routeSegments);
 
         if (typeof routeSegments === 'undefined' || !_isObject(routeSegments) || _isArray(routeSegments)) {
             throw new TypeError(`Expected routeSegments to be an object. Instead received ${typeof routeSegments}`);
@@ -49,7 +50,7 @@ export default class RouteSegmentCollection extends BaseCollection {
          */
         this.name = '';
 
-        return this._init(routeSegments);
+        return this._init(routeSegments, fixCollection);
     }
 
     /**
@@ -68,12 +69,13 @@ export default class RouteSegmentCollection extends BaseCollection {
      * @for RouteSegmentCollection
      * @method _init
      * @param routeSegments {object}
+     * @param fixCollection {FixCollection}
      * @chainable
      * @private
      */
-    _init(routeSegments) {
+    _init(routeSegments, fixCollection) {
         _forEach(routeSegments, (routeWaypoints, key) => {
-            const routeSegmentModel = new RouteSegmentModel(key, routeWaypoints);
+            const routeSegmentModel = new RouteSegmentModel(key, routeWaypoints, fixCollection);
 
             this._addSegmentToCollection(routeSegmentModel);
         });

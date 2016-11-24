@@ -2,7 +2,8 @@ import _compact from 'lodash/compact';
 import _find from 'lodash/find';
 import _forEach from 'lodash/forEach';
 import _map from 'lodash/map';
-import _uniqueId from 'lodash/uniqueId';
+import modelSourceFactory from '../../base/ModelSource/ModelSourceFactory';
+import BaseCollection from '../../base/BaseCollection';
 import FixModel from './FixModel';
 
 /**
@@ -14,42 +15,23 @@ import FixModel from './FixModel';
  * belonging to an Airport.
  *
  * @class FixCollection
+ * @extends BaseCollection
  */
-class FixCollection {
+export default class FixCollection extends BaseCollection {
     /**
-     * @for FixCollection
      * @constructor
+     * @for FixCollection
+     * @param fixList {object}
+     * @param airportPosition {PositionModel}
      */
-    constructor() {
-        /**
-         * Unigue string id that can be used to differentiate this model instance from another.
-         *
-         * @property _id
-         * @type {string}
-         * @default ''
-         * @private
-         */
-        this._id = '';
+    constructor(fixList, airportPosition) {
+        super();
 
-        /**
-         * Array of `FixModel`s
-         *
-         * @property _items
-         * @type {array<FixModel>}
-         * @default []
-         * @private
-         */
-        this._items = [];
-    }
+        if (!fixList || !airportPosition) {
+            throw new TypeError(`Invalid parameter. Expected both fixList and airportPosition to be defined`);
+        }
 
-    /**
-     * Convenience property to get at the current length of `_items`.
-     *
-     * @property length
-     * @type {number}
-     */
-    get length() {
-        return this._items.length;
+        return this.init(fixList, airportPosition);
     }
 
     /**
@@ -69,8 +51,6 @@ class FixCollection {
             this.destroy();
         }
 
-        this._id = _uniqueId();
-
         this._buildFixModelsFromList(fixList, airportPosition);
     }
 
@@ -81,25 +61,9 @@ class FixCollection {
      * @method destroy
      */
     destroy() {
-        this._id = '';
+        this._resetFixModels();
+
         this._items = [];
-    }
-
-    /**
-     * Loop through each fix provided in the fix list, create a new `FixModel` instance, then send it off
-     * to be added to the collection.
-     *
-     * @for FixCollection
-     * @method _buildFixModelsFromList
-     * @param fixList {object}
-     * @private
-     */
-    _buildFixModelsFromList(fixList, airportPosition) {
-        _forEach(fixList, (fixCoordinates, fixName) => {
-            const fixModel = new FixModel(fixName, fixCoordinates, airportPosition);
-
-            this.addFixToCollection(fixModel);
-        });
     }
 
     /**
@@ -165,6 +129,34 @@ class FixCollection {
 
         return _compact(realFixList);
     }
-}
 
-export default new FixCollection();
+    /**
+     * Loop through each fix provided in the fix list, create a new `FixModel` instance, then send it off
+     * to be added to the collection.
+     *
+     * @for FixCollection
+     * @method _buildFixModelsFromList
+     * @param fixList {object}
+     * @private
+     */
+    _buildFixModelsFromList(fixList, airportPosition) {
+        _forEach(fixList, (fixCoordinates, fixName) => {
+            const fixModel = modelSourceFactory.getModelSourceForType('FixModel');
+            fixModel.init(fixName, fixCoordinates, airportPosition);
+
+            this.addFixToCollection(fixModel);
+        });
+    }
+
+    /**
+     * @for FixCollection
+     * @method _resetFixModels
+     * @private
+     */
+    _resetFixModels() {
+        _forEach(this._items, (fixModel) => {
+            fixModel.reset();
+            modelSourceFactory.returnModelToPool(fixModel);
+        });
+    }
+}
