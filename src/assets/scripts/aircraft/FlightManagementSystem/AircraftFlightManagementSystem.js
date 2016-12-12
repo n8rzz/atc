@@ -143,19 +143,11 @@ export default class AircraftFlightManagementSystem {
 
     /** ***************** FMS FLIGHTPLAN CONTROL FUNCTIONS *******************/
 
-    /**
-     * Insert a Leg at the front of the flightplan
-     */
-    prependLeg(data) {
-        const prev = this.currentWaypoint;
-        const legToAdd = new Leg(data, this);
 
-        this.legs.unshift(legToAdd);
-        this.update_fp_route();
-
-        // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
-        // Verify altitude & speed not null
+    _setCuurentSpeedAndAltitudeFromPrevious() {
+        const prev = this.previousWaypoint;
         const curr = this.currentWaypoint;
+
         if (prev && !curr.altitude) {
             curr.altitude = prev.altitude;
         }
@@ -166,27 +158,57 @@ export default class AircraftFlightManagementSystem {
     }
 
     /**
+     * Insert a Leg at the front of the flightplan
+     */
+    prependLeg(data) {
+        // const prev = this.currentWaypoint;
+        const legToAdd = new Leg(data, this);
+
+        this.legs.unshift(legToAdd);
+
+        this.update_fp_route();
+        this._setCuurentSpeedAndAltitudeFromPrevious();
+
+        // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
+        // Verify altitude & speed not null
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
+    }
+
+    // FIXME: is this in use?
+    /**
      * Insert a waypoint at current position and immediately activate it
      */
     insertWaypointHere(data) {
+        if (console && console.trace) {
+            console.trace();
+        }
+
         const airport = window.airportController.airport_get();
-        const prev = this.currentWaypoint;
+        // const prev = this.currentWaypoint;
         const waypointToAdd = new Waypoint(data, airport);
 
         // TODO: split this up into smaller chunks
         this.currentLeg.waypoints.splice(this.current[WAYPOINT_WITHIN_LEG], 0, waypointToAdd);
         this.update_fp_route();
+        this._setCuurentSpeedAndAltitudeFromPrevious();
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Verify altitude & speed not null
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
-
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
     }
 
     /**
@@ -855,6 +877,17 @@ export default class AircraftFlightManagementSystem {
 
     get currentLeg() {
         return this.legs[this.current[LEG]];
+    }
+
+    get previousWaypoint() {
+        if (this.legs.length < 1) {
+            return null;
+        }
+
+        const currentLeg = this.currentLeg;
+        const previousWaypointIndex = this.current[WAYPOINT_WITHIN_LEG] - 1;
+
+        return currentLeg.waypoints[previousWaypointIndex];
     }
 
     get currentWaypoint() {
