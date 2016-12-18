@@ -10,13 +10,8 @@ const clientId = uuid();
 const socket = io({ query: `clientId=${clientId}` });
 
 const initiateSocketWithDingDong = () => {
-    const startPingTime = Date.now();
-
-    socket.emit('ding');
-    socket.on('dong', () => {
-        const latency = Date.now() - startPingTime;
-
-        console.log(`::: Ping: ${latency}ms`);
+    socket.on('ding', () => {
+        socket.emit('dong');
     });
 };
 
