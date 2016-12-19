@@ -15,7 +15,7 @@ const server = http.Server(app);
 const io = new SocketIO(server);
 
 const PORT = process.env.PORT || 3003;
-let sockets = {};-
+let sockets = {};
 
 app.use('/assets', express.static(path.join(__dirname, '/../../../assets')));
 
@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 });
 
 io.on(EVENTS.CONNECTION, (socket) => {
+    // START connection
     const clientId = socket.handshake.query.clientId;
 
     if (!uuid.valid(clientId)) {
@@ -43,7 +44,11 @@ io.on(EVENTS.CONNECTION, (socket) => {
     console.log(chalk.magenta(`[CONNECTION] User ${clientId} connected!`));
     console.log(chalk.dim(`${Object.keys(sockets).length} total users connected`));
 
-    io.emit('userJoin');
+    socket.on(EVENTS.COMMAND_ISSUED, ({ command }) => {
+        console.log(currentUser.clientId, command);
+
+        socket.broadcast.emit(EVENTS.COMMAND_RECEIVED, command);
+    });
 
     const startPingTime = Date.now();
     socket.emit('ding');
@@ -54,6 +59,8 @@ io.on(EVENTS.CONNECTION, (socket) => {
         console.log(chalk.dim(`::: DING ${latency}ms`));
     });
 
+
+    // END connection
     socket.on(EVENTS.DISCONNECT, () => {
         if (_has(sockets, clientId)) {
             console.log(chalk.red(`[DISCONNECT] User ${clientId} disconnected!`));

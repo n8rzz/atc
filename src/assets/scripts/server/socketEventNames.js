@@ -5,15 +5,15 @@ export const EVENTS = {
     USER_ADDED: 'USER_ADDED',
     USER_REMOVED: 'USER_REMOVED',
 
-    PING: 'PING'
+    PING: 'PING',
 
     // createRoom
     // joinRoom
     // leaveRoom
     // destroyRoom
 
-    // commandReceived
-    // commandParsed
+    COMMAND_ISSUED: 'COMMAND_ISSUED',
+    COMMAND_RECEIVED: 'COMMAND_RECEIVED'
 
     // newArrival
     // newDeparture

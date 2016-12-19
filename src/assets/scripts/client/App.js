@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import ConnectionController from './connectionController/ConnectionController';
 import ContentQueue from './contentQueue/ContentQueue';
 import LoadingView from './LoadingView';
 import AirportController from './airport/AirportController';
@@ -39,12 +40,13 @@ const RELEASE = false;
  */
 export default class App {
     /**
-     * @for App
      * @constructor
+     * @for App
      * @param $element {HTML Element|null}
      * @param airportLoadList {array<object>}  List of airports to load
+     * @param socket {SocketIO}
      */
-    constructor(element, airportLoadList) {
+    constructor(element, airportLoadList, socket) {
         /**
          * Root DOM element.
          *
@@ -53,6 +55,8 @@ export default class App {
          * @default body
          */
         this.$element = $(element);
+
+        this.connectionController = null;
         this.loadingView = null;
         this.contentQueue = null;
         this.airportController = null;
@@ -85,7 +89,7 @@ export default class App {
             this.prop.log = LOG.WARNING;
         }
 
-        return this.setupChildren(airportLoadList)
+        return this.setupChildren(airportLoadList, socket)
                     .enable();
     }
 
@@ -97,14 +101,16 @@ export default class App {
      * @for App
      * @method setupChildren
      * @param airportLoadList {array<object>}  List of airports to load
+     * @param socket {SocketIO}
      */
-    setupChildren(airportLoadList) {
+    setupChildren(airportLoadList, socket) {
+        this.connectionController = new ConnectionController(socket);
         this.loadingView = new LoadingView();
         this.contentQueue = new ContentQueue(this.loadingView);
         this.airportController = new AirportController(airportLoadList, this.updateRun);
         this.gameController = new GameController(this.getDeltaTime);
         this.tutorialView = new TutorialView(this.$element);
-        this.inputController = new InputController(this.$element);
+        this.inputController = new InputController(this.$element, this.connectionController);
         this.uiController = new UiController(this.$element);
         this.canvasController = new CanvasController(this.$element);
         this.gameClockView = new GameClockView(this.$element);
@@ -158,6 +164,7 @@ export default class App {
      */
     destroy() {
         this.$element = null;
+        this.connectionController = null;
         this.contentQueue = null;
         this.loadingView = null;
         this.airportController = null;
