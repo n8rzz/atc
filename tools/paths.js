@@ -8,7 +8,8 @@ var src = './src';
 var srcAssetsDir = path.join(src, 'assets');
 var scrScriptsFonts = path.join(srcAssetsDir, 'fonts');
 var srcScriptsDir = path.join(srcAssetsDir, 'scripts');
-var srcScriptsServerDir = path.join(srcAssetsDir, 'scripts/server');
+var srcScriptsServerDir = path.join(srcScriptsDir, 'server');
+var srcScriptsClientDir = path.join(srcScriptsDir, 'client');
 var srcStylesDir = path.join(srcAssetsDir, 'style');
 var srcImagesDir = path.join(srcAssetsDir, 'images');
 
@@ -16,7 +17,8 @@ var build = ROOT;
 var buildAssetsDir = path.join(ROOT, 'assets');
 var buildFontsDir = path.join(buildAssetsDir, 'fonts');
 var buildScriptsDir = path.join(buildAssetsDir, 'scripts');
-var buildScriptsServerDir = path.join(buildAssetsDir, 'scripts/server');
+var buildScriptsServerDir = path.join(buildScriptsDir, 'server');
+var buildScriptsClientDir = path.join(buildScriptsDir, 'client');
 var buildStylesDir = path.join(buildAssetsDir, 'style');
 var buildImagesDir = path.join(buildAssetsDir, 'images');
 
@@ -29,6 +31,7 @@ options.DIR = {
     SRC_FONTS: scrScriptsFonts,
     SRC_SCRIPTS: srcScriptsDir,
     SRC_SCRIPTS_SERVER: srcScriptsServerDir,
+    SRC_SCRIPTS_CLIENT: srcScriptsClientDir,
     SRC_STYLE: srcStylesDir,
     SRC_IMAGES: srcImagesDir,
 
@@ -37,14 +40,14 @@ options.DIR = {
     BUILD_FONTS: buildFontsDir,
     BUILD_SCRIPTS: buildScriptsDir,
     BUILD_SCRIPTS_SERVER: buildScriptsServerDir,
+    BUILD_SCRIPTS_CLIENT: buildScriptsClientDir,
     BUILD_STYLE: buildStylesDir,
     BUILD_IMAGES: buildImagesDir,
 };
 
 // for specific files
 options.FILE = {
-    JS_ENTRY_CLIENT: path.join(options.DIR.SRC_SCRIPTS, 'index.js'),
-    // TODO: this may need to move to a const
+    JS_ENTRY_CLIENT: path.join(options.DIR.SRC_SCRIPTS_CLIENT, 'index.js'),
     JS_ENTRY_SERVER: path.join(options.DIR.SRC_SCRIPTS_SERVER, 'index.js'),
     CSS_MAIN: path.join(options.DIR.SRC_STYLE, 'main.css'),
     PKG_JSON: path.join(options.ROOT, 'package.json')
