@@ -12,7 +12,7 @@
 
 ### Minor
 
-
+- Changes the sid and Start commands so there on screen disply is uppercase [#204](https://github.com/n8rzz/atc/issues/204)
 
 
 

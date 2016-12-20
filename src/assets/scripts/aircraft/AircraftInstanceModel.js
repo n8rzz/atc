@@ -952,7 +952,7 @@ export default class Aircraft {
         }
 
         const airport = window.airportController.airport_get();
-        const { name: procedureName } = airport.sidCollection.findRouteByIcao(this.fms.currentLeg.route.procedure);
+        const { name: procedureName } = airport.sidCollection.findRouteByIcao(this.fms.currentLeg.route.procedure).toUpperCase();
         const readback = {
             log: `climb via the ${this.fms.currentLeg.route.procedure} departure`,
             say: `climb via the ${procedureName} departure`
@@ -976,7 +976,7 @@ export default class Aircraft {
         }
 
         const airport = window.airportController.airport_get();
-        const { name: procedureName } = airport.starCollection.findRouteByIcao(this.fms.currentLeg.route.procedure);
+        const { name: procedureName } = airport.starCollection.findRouteByIcao(this.fms.currentLeg.route.procedure).toUpperCase();
         const readback = {
             log: `descend via the ${this.fms.following.star} arrival`,
             say: `descend via the ${procedureName} arrival`
