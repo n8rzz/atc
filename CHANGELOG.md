@@ -1,3 +1,37 @@
+## 3.3.0 (January 20, 2017)
+---
+### Major
+- Restructures `src` files into `client` and `server` folders. [#220](https://github.com/n8rzz/atc/issues/220)
+
+
+
+
+
+
+
+
+
+### Minor
+
+
+
+
+
+
+
+
+
+### Bugfixes
+
+
+
+
+
+
+
+
+
+
 ## 3.2.0 (December 20, 2016)
 ---
 ### Major

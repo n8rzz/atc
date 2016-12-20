@@ -23,7 +23,7 @@ module.exports = (gulp, config) => {
     // CLEAN DESTINATION SCRIPT FILES
     ////////////////////////////////////////////////////////////////////
     gulp.task('clean:build:scripts', (cb) => {
-        rimraf(OPTIONS.DIR.BUILD_SCRIPTS, cb);
+        rimraf(OPTIONS.DIR.BUILD_SCRIPTS_CLIENT, cb);
     });
 
     ////////////////////////////////////////////////////////////////////

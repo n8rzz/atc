@@ -29,7 +29,15 @@ module.exports = function(gulp, config) {
         .pipe(buffer())
         .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(OPTIONS.DIR.BUILD_SCRIPTS));
+        .pipe(gulp.dest(OPTIONS.DIR.BUILD_SCRIPTS_CLIENT));
+    });
+
+    gulp.task('babel-server', function () {
+        gulp.src([path.join(OPTIONS.DIR.SRC_SCRIPTS_SERVER, '**/*.js')])
+            .pipe(babel({
+                presets: ['es2015']
+            }))
+            .pipe(gulp.dest(OPTIONS.DIR.BUILD_SCRIPTS_SERVER))
     });
 
     gulp.task('babel-server', function () {

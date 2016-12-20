@@ -22,11 +22,6 @@ gulp.task('lint', ['lint:scripts']);
 
 gulp.task('build', () => {
     runSequence(
-        [
-            'clean:build:server',
-            'clean:build:scripts',
-            'clean:build:styles'
-        ],
         'build:server',
         'build:scripts',
         'build:styles'
