@@ -17,11 +17,18 @@
 - Ensures proper removal of all `AircraftConflict` instances involving an aircraft that has been removed from the simulation [#133](https://github.com/n8rzz/atc/issues/133)
     - Originally reported under [zlsa#734](https://github.com/zlsa/atc/issues/734)
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Changes the names from having the flags in their name by adding WIP variable to the `AIRPORT_LOAD_LIST` in `airportLoadList` [#205](https://github.com/n8rzz/atc/issues/205)
 =======
 - Fixes white space in that is displayed from the `AircraftInstanceModel` [#192](https://github.com/n8rzz/atc/issues/192)
 >>>>>>> 2c1371c113e33a2d6a9982fa2c9b711e974381cc
+=======
+- Changes the names from having the flags in their name by adding WIP variable to the `AIRPORT_LOAD_LIST` in `airportLoadList` [#205](https://github.com/n8rzz/atc/issues/205)
+>>>>>>> 971295f9ef4912c2cfe720cef72e9a3d17f2531b
 - Adds cache to travis build [#233](https://github.com/n8rzz/atc/issues/233)
+- Fixes white space in that is displayed from the `AircraftInstanceModel` [#192](https://github.com/n8rzz/atc/issues/192)
+
+
 
 
 
