@@ -85,12 +85,14 @@ export default class InputController {
     /**
      * @constructor
      */
-    constructor($element) {
+    constructor($element, connectionController) {
         this.$element = $element;
         this.$window = null;
         this.$commandInput = null;
         this.$canvases = null;
         this.$sidebar = null;
+
+        this._connectionController = connectionController;
 
         this.input = input;
         this.input.command = '';
@@ -128,6 +130,8 @@ export default class InputController {
      * @method setupHandlers
      */
     setupHandlers() {
+        this._connectionController.registerCommandReceivedHandler(this.input_run);
+
         return this;
     }
 
@@ -759,6 +763,8 @@ export default class InputController {
             throw error;
         }
 
+        this._connectionController.sendCommand(result);
+
         return result;
     }
 
@@ -766,15 +772,19 @@ export default class InputController {
      * @for InputController
      * @method input_run
      */
-    input_run() {
-        const commandParser = this._parseUserCommand();
+    input_run = (commandFromConnection = null) => {
+        let commandParser = commandFromConnection;
+
+        if (!commandParser) {
+            commandParser = this._parseUserCommand();
+        }
 
         if (commandParser.command !== 'transmit') {
             return this.processSystemCommand(commandParser);
         }
 
         return this.processTransmitCommand(commandParser);
-    }
+    };
 
     /**
      * @for InputController

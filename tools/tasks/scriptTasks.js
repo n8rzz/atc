@@ -40,6 +40,14 @@ module.exports = function(gulp, config) {
             .pipe(gulp.dest(OPTIONS.DIR.BUILD_SCRIPTS_SERVER))
     });
 
+    gulp.task('babel-server', function () {
+        gulp.src([path.join(OPTIONS.DIR.SRC_SCRIPTS_SERVER, '**/*.js')])
+            .pipe(babel({
+                presets: ['es2015']
+            }))
+            .pipe(gulp.dest(OPTIONS.DIR.BUILD_SCRIPTS_SERVER))
+    });
+
     ////////////////////////////////////////////////////////////////////
     // ESLINT
     ////////////////////////////////////////////////////////////////////
