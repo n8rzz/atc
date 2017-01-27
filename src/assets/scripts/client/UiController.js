@@ -311,7 +311,7 @@ export default class UiView {
                     `<span style="font-size: 7pt" class="difficulty">${difficulty}</span>` +
                     `<span class="icao">${icao.toUpperCase()}</span>` +
                     `<span class="name">${name}</span>` +
-                    `<span class="symbol">${flagIcon}</span>` +
+                    `<span class="symbol"> ${flagIcon}</span>` +
                 '</li>';
     }
 

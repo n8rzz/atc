@@ -20,6 +20,9 @@
 - Changes the names from having the flags in their name by adding WIP variable to the `AIRPORT_LOAD_LIST` in `airportLoadList` [#205](https://github.com/n8rzz/atc/issues/205)
 - Fixes white space in that is displayed from the `AircraftInstanceModel` [#192](https://github.com/n8rzz/atc/issues/192)
 - Adds cache to travis build [#233](https://github.com/n8rzz/atc/issues/233)
+- Fixes white space in that is displayed from the `AircraftInstanceModel` [#192](https://github.com/n8rzz/atc/issues/192)
+
+
 
 ### Bugfixes
 - Resets current indicies when issuing a new star to an arriving aircraft [#104](https://github.com/n8rzz/atc/issues/104) & [#237](https://github.com/n8rzz/atc/issues/237)
