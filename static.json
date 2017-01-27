@@ -2,7 +2,13 @@
   "root": "assets/",
   "https_only": true,
   "routes": {
-    "/assets/*": "/assets/",
+    "/aircraft/*": "/aircraft/",
+    "/airlines/*": "/airlines/",
+    "/airports/*": "/airports/",
+    "/fonts/*": "/fonts/",
+    "/images/*": "/images/",
+    "/scripts/*": "/scripts/",
+    "/style/*": "/style/",
     "/**": "index.html"
   },
   "headers": {
