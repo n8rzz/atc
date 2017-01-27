@@ -1,14 +1,8 @@
 {
-  "root": "assets/",
+  "root": "public",
   "https_only": true,
   "routes": {
-    "/aircraft/*": "/aircraft/",
-    "/airlines/*": "/airlines/",
-    "/airports/*": "/airports/",
-    "/fonts/*": "/fonts/",
-    "/images/*": "/images/",
-    "/scripts/*": "/scripts/",
-    "/style/*": "/style/",
+    "/assets/*": "/assets/",
     "/**": "index.html"
   },
   "headers": {
@@ -31,6 +25,9 @@
         "Cache-Control": "public, max-age=31536000"
     },
     "**.json": {
+        "Cache-Control": "public, max-age=31536000"
+    },
+    "**.geojson": {
         "Cache-Control": "public, max-age=31536000"
     }
   }
