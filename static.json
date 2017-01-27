@@ -24,6 +24,15 @@
     "**.gif": {
         "Cache-Control": "public, max-age=31536000"
     },
+    "**.ttf": {
+        "Cache-Control": "public, max-age=31536000"
+    },
+    "**.otf": {
+        "Cache-Control": "public, max-age=31536000"
+    },
+    "**.woff": {
+        "Cache-Control": "public, max-age=31536000"
+    },
     "**.json": {
         "Cache-Control": "public, max-age=31536000",
         "Content-Type": "application/json"
